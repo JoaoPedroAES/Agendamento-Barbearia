@@ -1,0 +1,21 @@
+# Dependências e Builds do .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.suo
+
+# Arquivos de Configuração Local (NÃO SUBIR SENHAS)
+appsettings.Development.json
+secrets.json
+*.Secret.json
+
+# Logs e arquivos do VS
+*.log
+.vs/
+.vscode/
+*.DotSettings.user
+
+# Arquivos do SO
+.DS_Store
+Thumbs.db
