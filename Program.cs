@@ -6,13 +6,27 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          // Permite que seu frontend (rodando em localhost:3000) 
+                          // faça requisições para este backend.
+                          policy.WithOrigins("http://localhost:3000")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Adiciona a definição de segurança "Bearer" (JWT)
+    
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -23,7 +37,7 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT"
     });
 
-    // Exige que todas as operações usem essa definição de segurança
+    
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -41,7 +55,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
-{
+{ 
     // Configurações de senha
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
@@ -60,12 +74,14 @@ var app = builder.Build();
 
 await app.SeedRolesAndAdminAsync();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapIdentityApi<ApplicationUser>();
 

@@ -1,8 +1,9 @@
-﻿using barbearia.api.Data;
+﻿// Controllers/WorkScheduleController.cs
+
+using barbearia.api.Data;
 using barbearia.api.Dtos;
 using barbearia.api.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ namespace barbearia.api.Controllers
 {
     [Route("api/work-schedule")]
     [ApiController]
-    [Authorize(Roles = "Admin,Barbeiro")]
+    
     public class WorkScheduleController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -19,17 +20,17 @@ namespace barbearia.api.Controllers
             _context = context;
         }
 
-        // Define ou atualiza o horário de um dia para um barbeiro
+        
         [HttpPost]
+        [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> SetWorkSchedule([FromBody] SetWorkScheduleDto dto)
         {
-            // (Verificação de segurança: um barbeiro só pode mudar o próprio horário)
-
-            var schedule = await _context.WorkSchedules.FirstOrDefaultAsync(s => s.BarberId == dto.BarberId && s.DayOfWeek == dto.DayOfWeek);
+            
+            var schedule = await _context.WorkSchedules
+                .FirstOrDefaultAsync(s => s.BarberId == dto.BarberId && s.DayOfWeek == dto.DayOfWeek);
 
             if (schedule == null)
             {
-                // Cria novo
                 schedule = new WorkSchedule
                 {
                     BarberId = dto.BarberId,
@@ -43,7 +44,6 @@ namespace barbearia.api.Controllers
             }
             else
             {
-                // Atualiza existente
                 schedule.StartTime = dto.StartTime;
                 schedule.EndTime = dto.EndTime;
                 schedule.BreakStartTime = dto.BreakStartTime;
@@ -51,17 +51,28 @@ namespace barbearia.api.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(schedule);
+
+            var scheduleWithBarber = await _context.WorkSchedules
+                .Include(s => s.Barber)
+                    .ThenInclude(b => b.UserAccount)
+                .FirstOrDefaultAsync(s => s.Id == schedule.Id);
+
+            return Ok(scheduleWithBarber);
         }
 
-        // Pega o horário de um barbeiro específico
+        
         [HttpGet("{barberId:int}")]
+        [Authorize]
         public async Task<IActionResult> GetSchedule(int barberId)
         {
-            var schedule = await _context.WorkSchedules
+            
+            var schedules = await _context.WorkSchedules
                 .Where(s => s.BarberId == barberId)
+                .Include(s => s.Barber)
+                    .ThenInclude(b => b.UserAccount)
                 .ToListAsync();
-            return Ok(schedule);
+
+            return Ok(schedules);
         }
     }
 }

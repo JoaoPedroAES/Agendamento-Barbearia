@@ -67,7 +67,7 @@ namespace barbearia.api.Controllers
             var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var appointments = await _context.Appointments
                 .Where(a => a.CustomerId == customerId)
-                .Include(a => a.Barber)
+                .Include(a => a.Barber).ThenInclude(b => b.UserAccount)
                 .Include(a => a.Services)
                 .OrderByDescending(a => a.StartDateTime)
                 .ToListAsync();
@@ -96,9 +96,14 @@ namespace barbearia.api.Controllers
         [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> GetAgenda([FromQuery] DateTime date)
         {
-            // (Se for barbeiro, filtrar para ver apenas os seus)
+            var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+            var endDate = startDate.AddDays(1);
+
             var appointments = await _context.Appointments
-                .Where(a => a.StartDateTime.Date == date.Date)
+                .Where(a =>
+                    a.StartDateTime >= startDate &&
+                    a.StartDateTime < endDate
+                )
                 .Include(a => a.Customer)
                 .Include(a => a.Services)
                 .ToListAsync();
