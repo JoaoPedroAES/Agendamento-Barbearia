@@ -1,0 +1,134 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.tela {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url("/public/img/background.png"); /* Garanta que a imagem está na pasta public/img */
+    background-size: cover;
+    background-position: center;
+}
+
+.container {
+    width: 450px;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2); /* CORRIGIDO de 'sold' para 'solid' */
+    padding: 40px;
+    border-radius: 10px;
+}
+
+.container h1{
+    text-align: center;
+    font-size: 32px;
+    color: var(--branco);
+}
+
+.container .texto{
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px auto;
+}
+
+.texto input{
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    outline: none;
+    border-color: var(--dourado);
+    border-radius: 40px;
+    font-size: 16px;
+    color: var(--branco);
+    padding: 20px 25px;
+}
+
+.texto input::placeholder{
+    color: var(--branco);
+}
+
+.texto .icon{
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--dourado);
+}
+
+.container .recallforget{
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin: -15px 0 15px;
+}
+
+.texto label, .recallforget label{
+    color: var(--branco);
+    cursor: pointer;
+}
+
+.recallforget input{
+    margin-right: 5px;
+}
+
+
+.recallforget a, .registrar p a{
+    color: var(--branco);
+    text-decoration: none;
+}
+
+.recallforget a:hover, .registrar p a:hover{
+    text-decoration: underline;
+    color: var(--dourado);
+}
+
+.container button{
+    width: 100%;
+    height: 50px; /* Corrigido de 50% para 50px para ter altura fixa */
+    background-color: var(--branco);
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    text-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px;
+    background: linear-gradient(to right, var(--dourado));
+}
+
+/* --- ADIÇÃO PARA MENSAGEM DE ERRO --- */
+.error {
+    color: #ffb3b3; /* Um vermelho claro que combina com o tema */
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin: -10px 0 15px 0; /* Espaçamento para aparecer entre o 'lembrar senha' e o botão */
+    font-weight: 600;
+}
+/* --- FIM DA ADIÇÃO --- */
+
+.container .registrar{
+    font-size: 15px;
+    text-align: center;
+    margin: 20px 0 10px;
+    text-shadow: none;
+}
+
+.registrar p a{
+    color: var(--branco);
+}
