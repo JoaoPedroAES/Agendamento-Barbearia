@@ -1,0 +1,122 @@
+/* CSS Unificado para Formulários */
+
+.tela {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url("/public/img/background.png");
+    background-size: cover;
+    background-position: center;
+}
+
+.container {
+    width: 480px;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 40px;
+    border-radius: 10px;
+}
+
+.container h1 {
+    text-align: center;
+    font-size: 32px;
+    color: #ffffff;
+    margin-bottom: 30px;
+}
+
+.inputGroup {
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+/* Estilo para as labels (usado no Editar Perfil) */
+.inputGroup label {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.inputGroup input {
+    width: 100%;
+    height: 50px;
+    background-color: transparent;
+    outline: none;
+    border: 2px solid #daa520; /* Borda dourada consistente */
+    border-radius: 40px;
+    font-size: 16px;
+    color: #ffffff;
+    padding: 20px 25px;
+    box-sizing: border-box; /* Garante que o padding não aumente o tamanho */
+}
+
+.inputGroup input::placeholder {
+    color: #ffffff;
+}
+
+.inputGroup input:disabled {
+    background-color: rgba(0, 0, 0, 0.2);
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.addressFields {
+    display: flex;
+    gap: 10px;
+}
+
+.addressFields .inputGroup {
+    flex: 1;
+}
+
+.addressFields .inputGroup.numberField {
+    flex: 0 0 100px;
+}
+
+.button {
+    width: 100%;
+    height: 50px;
+    background-color: #ffffff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.button:hover {
+    background: #daa520;
+    color: #ffffff;
+}
+
+.loginLink {
+    font-size: 15px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loginLink p a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.loginLink p a:hover {
+    text-decoration: underline;
+}
+
+.error {
+    color: #ffb3b3;
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}

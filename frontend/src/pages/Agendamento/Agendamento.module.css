@@ -1,0 +1,92 @@
+/* src/pages/Agendamento/Agendamento.module.css */
+.page {
+    padding: 2rem;
+    background-color: #f4f7f6;
+}
+
+.page h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.selectionContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.column h2 {
+    border-bottom: 2px solid var(--dourado);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.item, .datePicker {
+    padding: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.item:hover {
+    border-color: var(--dourado);
+    transform: translateY(-2px);
+}
+
+.item.selected {
+    border-color: var(--dourado);
+    background-color: #fffbeb;
+    font-weight: bold;
+}
+
+.datePicker input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.slotsContainer h2 {
+    text-align: center;
+}
+
+.slotsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.slotButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dourado);
+    background-color: white;
+    border: 2px solid var(--dourado);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.slotButton:hover {
+    background-color: var(--dourado);
+    color: white;
+}
+
+.loadingText {
+    text-align: center;
+    font-style: italic;
+    color: #555;
+}
+
+.datePickerInput {
+    width: 100%;
+    box-sizing: border-box;
+}

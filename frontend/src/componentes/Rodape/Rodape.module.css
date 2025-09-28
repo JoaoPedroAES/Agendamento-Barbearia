@@ -1,0 +1,67 @@
+.rodape {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #fff;
+  color: #000;
+  border-top: 1px solid #e6c96d;
+}
+
+.titulo {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.descricao {
+  max-width: 600px;
+  margin: 0 auto 30px;
+  font-size: 14px;
+  color: #444;
+}
+
+.contatos {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  margin-bottom: 30px;
+}
+
+.card {
+  text-align: center;
+}
+
+.icone {
+  width: 30px;
+  margin-bottom: 8px;
+}
+
+.card h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.card p {
+  margin: 2px 0;
+  font-size: 16px;
+  color: #222;
+}
+
+.copy {
+  font-size: 13px;
+  color: #444;
+  border-top: 1px solid #e6c96d;
+  padding-top: 10px;
+  margin-top: 20px;
+}
+
+.link {
+  color: #000;
+  text-decoration: none;
+  transition: 0.5s;
+}
+
+.link:hover {
+  color: #e6c96d;
+  text-decoration: underline;
+}
