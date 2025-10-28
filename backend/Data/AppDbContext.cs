@@ -1,6 +1,7 @@
 ﻿using barbearia.api.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace barbearia.api.Data
 {
@@ -23,6 +24,10 @@ namespace barbearia.api.Data
                 .HasOne(a => a.Address)
                 .WithOne(u => u.User)
                 .HasForeignKey<Address>(a => a.ApplicationUserId);
+
+            builder.Entity<Service>()
+                .Property(s => s.Id)
+                .ValueGeneratedOnAdd();
 
         }
 

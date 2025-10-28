@@ -1,6 +1,7 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Dtos;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -13,148 +14,101 @@ namespace barbearia.api.Controllers
     [ApiController]
     public class BarberController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _context;
+        private readonly IBarberService _barberService;
 
-        public BarberController(UserManager<ApplicationUser> userManager, AppDbContext context)
+        public BarberController(IBarberService barberService)
         {
-            _userManager = userManager;
-            _context = context;
+            _barberService = barberService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<BarberProfileDto>>> GetBarbers()
         {
-
-            var barbers = await _context.Barbers
-                .Include(barbers => barbers.UserAccount)
-                .Where(barbers => barbers.IsActive == true)
-                .Select(barbers => new BarberProfileDto
-                {
-                    BarberId = barbers.Id,
-                    UserId = barbers.ApplicationUserId,
-                    FullName = barbers.UserAccount.FullName,
-                    Email = barbers.UserAccount.Email,
-                    PhoneNumber = barbers.UserAccount.PhoneNumber,
-                    Bio = barbers.Bio
-                })
-                .ToListAsync();
-
+            var barbers = await _barberService.GetActiveBarbersAsync();
             return Ok(barbers);
+        }
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Barbeiro")]
+        public async Task<IActionResult> GetBarberById(int id)
+        {
+            try
+            {
+                var barberDto = await _barberService.GetBarberByIdAsync(id);
+
+                if (barberDto == null)
+                {
+                    return NotFound("Barbeiro não encontrado.");
+                }
+
+                return Ok(barberDto);
+            }
+            catch (Exception ex)
+            {
+                // Logar o erro (ex.Message)
+                return StatusCode(500, "Erro interno ao buscar dados do barbeiro.");
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin, Barbeiro")]
-        public async Task<ActionResult> CreateBarberProfile([FromBody] CreateBarberDto dto)
+        public async Task<ActionResult<BarberProfileDto>> CreateBarberProfile([FromBody] CreateBarberDto dto)
         {
-            // 1. Verificar se o usuário já existe pelo email
-            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-            if (existingUser != null)
+            try
             {
-                return BadRequest("Este e-mail já está em uso.");
+                var createdBarber = await _barberService.CreateBarberAsync(dto);
+                // Retorna 201 Created com o perfil criado
+                return CreatedAtAction(nameof(GetBarbers), new { id = createdBarber.BarberId }, createdBarber);
             }
-
-            
-            var newUser = new ApplicationUser
+            catch (ArgumentException ex)
             {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                UserName = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                EmailConfirmed = true
-            };
-
-            var identityResult = await _userManager.CreateAsync(newUser, dto.Password);
-
-            if (!identityResult.Succeeded)
-            {
-                return BadRequest(identityResult.Errors);
+                return BadRequest(ex.Message); // E-mail duplicado
             }
-
-            
-            await _userManager.AddToRoleAsync(newUser, "Barbeiro");
-
-            
-            var barberProfile = new Barber
+            catch (InvalidOperationException ex)
             {
-                ApplicationUserId = newUser.Id,
-                Bio = dto.Bio ?? string.Empty
-            };
-
-            _context.Barbers.Add(barberProfile);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Barbeiro criado com sucesso." });
+                return BadRequest(ex.Message); // Erro do Identity
+            }
+            catch (Exception ex)
+            {
+                // Logar erro ex
+                return StatusCode(500, "Erro interno ao criar barbeiro.");
+            }
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> UpdateBarber(int id, [FromBody] UpdateBarberDto dto)
         {
-            var barberProfile = await _context.Barbers
-                                    .Include(b => b.UserAccount)
-                                    .FirstOrDefaultAsync(b => b.Id == id);
-
-            if (barberProfile == null)
+            try
             {
-                return NotFound("Perfil de barbeiro não encontrado.");
-            }
-
-            barberProfile.Bio = dto.Bio ?? barberProfile.Bio;
-
-            var user = barberProfile.UserAccount;
-            user.FullName = dto.FullName;
-            user.PhoneNumber = dto.PhoneNumber;
-
-            if (user.Email != dto.Email)
-            {
-                // Verifica se o NOVO email já não está em uso por outra pessoa
-                var existingEmail = await _userManager.FindByEmailAsync(dto.Email);
-                if (existingEmail != null && existingEmail.Id != user.Id)
+                var success = await _barberService.UpdateBarberAsync(id, dto);
+                if (!success)
                 {
-                    return BadRequest("O novo e-mail fornecido já está em uso por outra conta.");
+                    return NotFound("Barbeiro não encontrado.");
                 }
-
-                // Define o novo email e força a confirmação (já que é um Admin que está mudando)
-                var setEmailResult = await _userManager.SetEmailAsync(user, dto.Email);
-                if (!setEmailResult.Succeeded) return BadRequest("Falha ao atualizar o e-mail.");
-
-                user.EmailConfirmed = true;
-
-                // Atualiza também o UserName (pois estamos usando o email como login)
-                var setUserNameResult = await _userManager.SetUserNameAsync(user, dto.Email);
-                if (!setUserNameResult.Succeeded) return BadRequest("Falha ao atualizar o nome de usuário.");
+                return NoContent(); // 204 Sucesso
             }
- 
-            await _context.SaveChangesAsync();
-            await _userManager.UpdateAsync(user);
-
-            return NoContent();
+            catch (ArgumentException ex) // E-mail duplicado
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Logar erro ex
+                return StatusCode(500, "Erro interno ao atualizar barbeiro.");
+            }
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> DeactivateBarber(int id)
         {
-            var barberProfile = await _context.Barbers.FindAsync(id);
-            if (barberProfile == null)
+            var success = await _barberService.DeactivateBarberAsync(id);
+            if (!success)
             {
-                return NotFound("Perfil de barbeiro não encontrado.");
+                return NotFound("Barbeiro não encontrado ou já inativo.");
             }
-
-            
-            barberProfile.IsActive = false;
-
-            var user = await _userManager.FindByIdAsync(barberProfile.ApplicationUserId);
-            if (user != null)
-            {
-                await _userManager.RemoveFromRoleAsync(user, "Barbeiro");
-            }
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NoContent(); // 204 Sucesso
         }
     }
 }

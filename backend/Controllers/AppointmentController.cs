@@ -1,6 +1,7 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Dtos;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +15,12 @@ namespace barbearia.api.Controllers
     [Authorize]
     public class AppointmentController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public AppointmentController(AppDbContext context) { _context = context; }
+        private readonly IAppointmentService _appointmentService;
+
+        public AppointmentController(IAppointmentService appointmentService)
+        {
+            _appointmentService = appointmentService;
+        }
 
         // Cliente: Criar um novo agendamento
         [HttpPost]
@@ -25,38 +30,25 @@ namespace barbearia.api.Controllers
             var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (customerId == null) return Unauthorized();
 
-            // 1. Buscar os serviços e calcular total
-            var services = new List<Service>();
-            decimal totalPrice = 0;
-            int totalDuration = 0;
-            foreach (var serviceId in dto.ServiceIds)
+            try
             {
-                var service = await _context.Services.FindAsync(serviceId);
-                if (service == null) return NotFound($"Serviço {serviceId} não encontrado.");
-                services.Add(service);
-                totalPrice += service.Price;
-                totalDuration += service.DurationInMinutes;
+                var appointment = await _appointmentService.CreateAppointmentAsync(dto, customerId);
+                // Retorna 201 Created com o objeto criado
+                return CreatedAtAction(nameof(GetMyAppointments), appointment);
             }
-
-            var startDateTimeUtc = DateTime.SpecifyKind(dto.StartDateTime, DateTimeKind.Utc);
-
-            var appointment = new Appointment
+            catch (ArgumentException ex)
             {
-                CustomerId = customerId,
-                BarberId = dto.BarberId,
-                StartDateTime = startDateTimeUtc, 
-                EndDateTime = startDateTimeUtc.AddMinutes(totalDuration),
-                Status = AppointmentStatus.Scheduled,
-                TotalPrice = totalPrice,
-                Services = services
-            };
-
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
-
-            
-
-            return Ok(appointment);
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex) // Captura erro de slot ocupado
+            {
+                return Conflict(ex.Message); // Retorna 409 Conflict
+            }
+            catch (Exception ex)
+            {
+                // Logar erro ex
+                return StatusCode(500, "Erro interno ao criar agendamento.");
+            }
         }
 
         // Cliente: Ver meus agendamentos 
@@ -65,13 +57,9 @@ namespace barbearia.api.Controllers
         public async Task<IActionResult> GetMyAppointments()
         {
             var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var appointments = await _context.Appointments
-                .Where(a => a.CustomerId == customerId)
-                .Include(a => a.Barber).ThenInclude(b => b.UserAccount)
-                .Include(a => a.Services)
-                .OrderByDescending(a => a.StartDateTime)
-                .ToListAsync();
+            if (customerId == null) return Unauthorized();
 
+            var appointments = await _appointmentService.GetMyAppointmentsAsync(customerId);
             return Ok(appointments);
         }
 
@@ -81,14 +69,16 @@ namespace barbearia.api.Controllers
         public async Task<IActionResult> CancelAppointment(int id)
         {
             var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var appointment = await _context.Appointments.FindAsync(id);
+            if (customerId == null) return Unauthorized();
 
-            if (appointment == null) return NotFound();
-            if (appointment.CustomerId != customerId) return Forbid(); // Não é dono
+            var success = await _appointmentService.CancelAppointmentAsync(id, customerId);
 
-            appointment.Status = AppointmentStatus.CancelledByCustomer;
-            await _context.SaveChangesAsync();
-            return Ok();
+            if (!success)
+            {
+                // Pode ser NotFound ou Forbidden dependendo da lógica do serviço
+                return NotFound("Agendamento não encontrado ou não pertence ao usuário.");
+            }
+            return NoContent(); // Retorna 204 No Content para sucesso
         }
 
         // Admin/Barbeiro: Ver agenda [cite: 48]
@@ -96,18 +86,10 @@ namespace barbearia.api.Controllers
         [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> GetAgenda([FromQuery] DateTime date)
         {
-            var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
-            var endDate = startDate.AddDays(1);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isBarber = User.IsInRole("Barbeiro");
 
-            var appointments = await _context.Appointments
-                .Where(a =>
-                    a.StartDateTime >= startDate &&
-                    a.StartDateTime < endDate
-                )
-                .Include(a => a.Customer)
-                .Include(a => a.Services)
-                .ToListAsync();
-
+            var appointments = await _appointmentService.GetAgendaAsync(date, userId, isBarber);
             return Ok(appointments);
         }
     }
