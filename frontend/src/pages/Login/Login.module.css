@@ -9,7 +9,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url("/public/img/background.png"); /* Garanta que a imagem está na pasta public/img */
+    background-image: url("/public/img/background.png"); 
     background-size: cover;
     background-position: center;
 }
@@ -18,7 +18,7 @@
     width: 450px;
     background-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2); /* CORRIGIDO de 'sold' para 'solid' */
+    border: 2px solid rgba(255, 255, 255, 0.2); 
     padding: 40px;
     border-radius: 10px;
 }
@@ -90,7 +90,7 @@
 
 .container button{
     width: 100%;
-    height: 50px; /* Corrigido de 50% para 50px para ter altura fixa */
+    height: 50px; 
     background-color: var(--branco);
     border: none;
     outline: none;
@@ -109,18 +109,18 @@
     background: linear-gradient(to right, var(--dourado));
 }
 
-/* --- ADIÇÃO PARA MENSAGEM DE ERRO --- */
+
 .error {
-    color: #ffb3b3; /* Um vermelho claro que combina com o tema */
+    color: #ffb3b3; 
     background-color: rgba(255, 0, 0, 0.1);
     border: 1px solid rgba(255, 0, 0, 0.2);
     text-align: center;
     padding: 10px;
     border-radius: 8px;
-    margin: -10px 0 15px 0; /* Espaçamento para aparecer entre o 'lembrar senha' e o botão */
+    margin: -10px 0 15px 0; 
     font-weight: 600;
 }
-/* --- FIM DA ADIÇÃO --- */
+
 
 .container .registrar{
     font-size: 15px;
