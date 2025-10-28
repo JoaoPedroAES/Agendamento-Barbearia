@@ -1,5 +1,6 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,11 @@ namespace barbearia.api.Controllers
     [ApiController]
     public class AvailabilityController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public AvailabilityController(AppDbContext context) { _context = context; }
+        private readonly IAvailabilityService _availabilityService;
+        public AvailabilityController(IAvailabilityService availabilityService)
+        {
+            _availabilityService = availabilityService;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAvailability(
@@ -19,68 +23,21 @@ namespace barbearia.api.Controllers
             [FromQuery] List<int> serviceIds,
             [FromQuery] DateTime date)
         {
-            // 1. Calcular Duração Total dos Serviços
-            int totalDuration = 0;
-            foreach (var serviceId in serviceIds)
+            try
             {
-                var service = await _context.Services.FindAsync(serviceId);
-                if (service == null) return NotFound($"Serviço {serviceId} não encontrado.");
-                totalDuration += service.DurationInMinutes;
+                var availableSlots = await _availabilityService.GetAvailableSlotsAsync(barberId, serviceIds, date);
+                return Ok(availableSlots);
             }
-
-
-            var dayOfWeek = date.DayOfWeek;
-            var workSchedule = await _context.WorkSchedules
-                .FirstOrDefaultAsync(s => s.BarberId == barberId && s.DayOfWeek == dayOfWeek);
-
-            if (workSchedule == null)
+            catch (ArgumentException ex) // Captura erros específicos do serviço
             {
-                return Ok(new List<string>()); // Barbeiro não trabalha neste dia
+                return BadRequest(ex.Message);
             }
-
-            var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
-            var endDate = startDate.AddDays(1);
-
-            var existingAppointments = await _context.Appointments
-                .Where(a => a.BarberId == barberId &&
-                a.StartDateTime >= startDate &&
-                a.StartDateTime < endDate &&
-                a.Status == AppointmentStatus.Scheduled).ToListAsync();
-
-            // 4. Gerar Slots Disponíveis (Lógica Principal)
-            var availableSlots = new List<TimeSpan>();
-            var slotInterval = TimeSpan.FromMinutes(15); // Define a granularidade (ex: 9:00, 9:15, 9:30)
-            var currentSlot = workSchedule.StartTime;
-
-            while (currentSlot < workSchedule.EndTime)
+            catch (Exception ex) // Captura erros genéricos
             {
-                var slotEndTime = currentSlot.Add(TimeSpan.FromMinutes(totalDuration));
-
-                // 4a. Verifica se o slot termina antes do fim do dia
-                if (slotEndTime > workSchedule.EndTime)
-                {
-                    break; // Não cabe mais neste dia
-                }
-
-                // 4b. Verifica se o slot cai DENTRO do horário de almoço
-                bool inBreak = (currentSlot < workSchedule.BreakEndTime &&
-                                slotEndTime > workSchedule.BreakStartTime);
-
-                // 4c. Verifica se o slot colide com agendamentos existentes
-                bool overlapsExisting = existingAppointments.Any(a =>
-                    currentSlot < a.EndDateTime.TimeOfDay &&
-                    slotEndTime > a.StartDateTime.TimeOfDay
-                );
-
-                if (!inBreak && !overlapsExisting)
-                {
-                    availableSlots.Add(currentSlot);
-                }
-
-                currentSlot = currentSlot.Add(slotInterval);
+                Console.WriteLine($"Erro inesperado em GetAvailability: {ex.Message}");
+                return StatusCode(500, "Ocorreu um erro interno ao buscar a disponibilidade.");
             }
-
-            return Ok(availableSlots); // Retorna lista de horários (ex: ["09:00:00", "09:45:00"])
         }
+
     }
 }

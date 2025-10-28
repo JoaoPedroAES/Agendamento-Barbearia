@@ -1,70 +1,54 @@
-﻿using barbearia.api.Data;
-using barbearia.api.Dtos;
-using barbearia.api.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using barbearia.api.Dtos;         // Para RegisterCustomerDto
+using barbearia.api.Services;     // Para IUserService
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace barbearia.api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _context;
+        // ÚNICA DEPENDÊNCIA: O Serviço de Usuário
+        private readonly IUserService _userService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, AppDbContext context)
+        public AuthController(IUserService userService)
         {
-            _userManager = userManager;
-            _context = context;
+            _userService = userService;
         }
 
         [HttpPost("register-customer")]
         public async Task<IActionResult> RegisterCustomer([FromBody] RegisterCustomerDto dto)
         {
-            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-            if (existingUser != null)
+            // Validação básica do modelo recebido
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Este e-mail já está em uso.");
+                return BadRequest(ModelState);
             }
 
-            
-            var newUser = new ApplicationUser
+            try
             {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                UserName = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                EmailConfirmed = true
-            };
+                // Delega a lógica de registro para o serviço
+                var user = await _userService.RegisterCustomerAsync(dto);
 
-            var identityResult = await _userManager.CreateAsync(newUser, dto.Password);
-            if (!identityResult.Succeeded)
-            {
-                return BadRequest(identityResult.Errors);
+                // Retorna 201 Created (ou 200 OK) com mensagem de sucesso
+                return StatusCode(201, new { Message = $"{(dto.CreateAsAdmin ? "Administrador" : "Cliente")} cadastrado com sucesso!" });
             }
-
-            
-            await _userManager.AddToRoleAsync(newUser, "Cliente");
-
-            
-            var address = new Address
+            catch (ArgumentException ex) // Captura erro de e-mail duplicado vindo do serviço
             {
-                ApplicationUserId = newUser.Id,
-                Cep = dto.Cep,
-                Street = dto.Street,
-                Number = dto.Number,
-                Complement = dto.Complement,
-                Neighborhood = dto.Neighborhood,
-                City = dto.City,
-                State = dto.State
-            };
-
-            _context.Addresses.Add(address);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Cliente cadastrado com sucesso!" });
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex) // Captura erros do Identity vindos do serviço
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex) // Captura erros genéricos
+            {
+                // É uma boa prática logar o erro real para depuração
+                Console.WriteLine($"Erro inesperado em RegisterCustomer: {ex}"); // Log simples
+                return StatusCode(500, "Ocorreu um erro interno durante o cadastro.");
+            }
         }
     }
 }

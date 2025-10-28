@@ -1,5 +1,6 @@
 using barbearia.api.Data;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -69,6 +70,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 builder.Services.AddAuthorizationBuilder();
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBarberService, BarberService>();
+builder.Services.AddScoped<IServicesService, ServicesService>();
+builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 
 var app = builder.Build();
 
