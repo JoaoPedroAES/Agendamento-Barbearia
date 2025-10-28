@@ -1,22 +1,46 @@
-/* src/pages/Dashboard/Dashboard.module.css */
-.dashboard {
-    padding: 2rem;
-    background-color: #f4f7f6;
+
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+    --branco: #ffffff;
+    --preto-fundo: #1f1f1f;
+    --preto-card: #2a2a2a;
+    --vermelho: #e74c3c;
+}
+
+.page {
+    padding: 2rem 4rem;
+    background-color: var(--preto-fundo);
+    color: var(--branco);
     min-height: 100vh;
 }
+
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+    color: var(--branco);
 }
 
 .header h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
     margin: 0;
-    color: #333;
+}
+.header h1 strong {
+    color: var(--dourado);
+    font-weight: 600;
+}
+
+.welcomeMessage {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #ccc;
+    margin-right: 2.5rem; 
 }
 
 .settingsMenu {
@@ -27,112 +51,184 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.5rem;
-    color: #555;
+    font-size: 1.8rem;
+    color: var(--branco);
+    padding: 5px;
+    display: flex;
+    align-items: center;
 }
 
 .dropdown {
     position: absolute;
-    top: 100%;
+    top: 120%;
     right: 0;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    padding: 0.5rem 0;
-    width: 200px;
-    z-index: 10;
-    border: 1px solid #eee;
+    background-color: #1c1c1c;
+    border: 1px solid var(--dourado);
+    border-radius: 5px;
+    width: 220px;
+    z-index: 100;
+    padding: 5px 0;
+    font-family: 'Oswald', sans-serif;
 }
 
-.dropdown button {
+.dropdown button, .dropdown a {
     display: block;
     width: 100%;
-    padding: 0.75rem 1rem;
-    border: none;
+    padding: 12px 20px;
     background: none;
-    text-align: left;
+    border: none;
+    color: var(--branco);
+    text-align: center; 
     cursor: pointer;
     font-size: 1rem;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-decoration: none;
 }
 
-.dropdown button:hover {
-    background-color: #f4f7f6;
+.dropdown button:hover, .dropdown a:hover {
+    background-color: var(--dourado);
+    color: black;
+}
+
+
+.content {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 .section {
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
 }
 
-.sectionTitle {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 1rem;
+.section h2 {
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    color: var(--dourado);
+    text-transform: uppercase;
 }
 
-.appointmentList {
+
+.appointmentsGrid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    margin-bottom: 2rem;
 }
 
 .appointmentCard {
-    background-color: white;
+    background-color: var(--preto-card);
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--dourado);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.appointmentCard h3 {
-    margin-top: 0;
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.date {
+    font-size: 1.2rem;
+    font-weight: 600;
     color: var(--dourado);
+}
+.time {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #ccc;
 }
 
 .appointmentCard p {
-    margin: 0.5rem 0;
-    color: #555;
+    margin: 0.6rem 0;
+    font-size: 1rem;
+    color: #ddd;
+}
+.appointmentCard p strong {
+    font-weight: 500;
+    color: #fff;
+}
+.statusAgendado {
+    color: #2ecc71; 
+    font-weight: 600;
 }
 
-.appointmentCard button {
-    margin-top: 1rem;
+.cancelButton {
+    background: transparent;
+    border: 1px solid var(--vermelho);
+    color: var(--vermelho);
     padding: 0.5rem 1rem;
-    border: 1px solid #ff4d4d;
-    background-color: transparent;
-    color: #ff4d4d;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    transition: all 0.2s;
+}
+.cancelButton:hover {
+    background: var(--vermelho);
+    color: var(--branco);
 }
 
-.appointmentCard button:hover {
-    background-color: #ff4d4d;
-    color: white;
+.agendarButton {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--dourado);
+    color: #121212;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+.agendarButton:hover {
+    opacity: 0.8;
 }
 
-.serviceList {
+
+.servicesGrid {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
 }
 
-.serviceCard {
-    background-color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 50px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.serviceTag {
+    background-color: var(--preto-card);
+    border: 1px solid #444;
+    padding: 0.8rem 1.2rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ccc;
 }
 
-.newAppointmentButton {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
+.serviceTag span {
+    color: var(--dourado);
     font-weight: 600;
-    color: white;
-    background-color: var(--dourado);
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    margin-left: 10px;
 }
 
-.newAppointmentButton:hover {
-    transform: scale(1.05);
+.error {
+    color: var(--vermelho);
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
 }

@@ -1,0 +1,245 @@
+
+.page {
+    padding: 2rem 4rem;
+    background-color: #1f1f1f; 
+    color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Oswald', sans-serif;
+}
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem; 
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+    color: #ffffff; 
+}
+
+.header h1 {
+    font-size: 2.5rem; 
+    font-weight: 500;
+    margin: 0;
+}
+
+.headerRight { 
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; 
+}
+
+.welcomeMessage { 
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #ccc; 
+}
+
+.settingsMenu {
+    position: relative;
+}
+
+.gearButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.8rem; 
+    color: #ffffff; 
+    padding: 5px; 
+    display: flex; 
+    align-items: center;
+}
+
+.dropdown {
+    position: absolute;
+    top: 120%; 
+    right: 0;
+    background-color: #1c1c1c; 
+    border: 1px solid var(--dourado);
+    border-radius: 5px;
+    width: 220px; 
+    z-index: 100;
+    padding: 5px 0;
+    font-family: 'Oswald', sans-serif; 
+}
+
+.dropdown button, .dropdown a { 
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: var(--branco);
+    text-align: center;
+    cursor: pointer;
+    font-size: 1rem;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+}
+
+.dropdown button:hover, .dropdown a:hover {
+    background-color: var(--dourado);
+    color: black;
+}
+
+
+.mainGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; 
+    gap: 2rem;
+}
+
+.agendaSection h2, .actionsSection h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    color: var(--dourado);
+}
+
+
+.agendaControls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.agendaControls label {
+    font-weight: 600;
+}
+
+.agendaControls input, .agendaControls select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    background-color: #333;
+    border: 1px solid #555;
+    color: #fff;
+    font-family: inherit;
+}
+
+.appointmentList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 60vh; 
+    overflow-y: auto;
+    padding-right: 10px; 
+}
+
+.appointmentCard {
+    background-color: #2a2a2a;
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    border-left: 4px solid var(--dourado);
+}
+
+.appointmentCard h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.appointmentCard p {
+    margin: 0.3rem 0;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+
+.actionButton {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--dourado);
+    color: #121212;
+    border: none;
+    text-align: center;
+    text-decoration: none; 
+}
+
+.actionButton:hover {
+    opacity: 0.8;
+}
+
+.scheduleContainer {
+    margin-top: 2rem;
+    background-color: #2a2a2a;
+    padding: 1.5rem;
+    border-radius: 5px;
+}
+
+.dayRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #444;
+}
+.dayRow:last-child {
+    border-bottom: none;
+}
+
+.dayLabel {
+    display: flex; 
+    align-items: center;
+    font-weight: 500;
+}
+
+.dayLabel input[type="checkbox"] {
+    width: 18px; 
+    height: 18px;
+    margin-right: 10px;
+    accent-color: var(--dourado);
+}
+
+
+.timeInputs {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+}
+
+.timeInputs input[type="time"] {
+    background-color: #444;
+    border: 1px solid #666;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    width: 80px;
+}
+
+.timeInputs input[type="time"]:disabled {
+    background-color: #222;
+    opacity: 0.5;
+}
+
+
+.saveScheduleButton {
+    margin-top: 1.5rem;
+    padding: 10px 20px;
+    background-color: var(--dourado);
+    color: #121212;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.saveScheduleButton:hover {
+    opacity: 0.9;
+}
