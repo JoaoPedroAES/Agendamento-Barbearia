@@ -1,0 +1,119 @@
+
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+    --branco: #ffffff;
+    --preto-fundo: #1f1f1f;
+    --preto-card: #2a2a2a;
+}
+
+.page {
+    padding: 2rem 4rem;
+    background-color: var(--preto-fundo);
+    color: var(--branco);
+    min-height: 100vh;
+}
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.backButton {
+    background: none;
+    border: 1px solid var(--branco);
+    color: var(--branco);
+    padding: 0.5rem 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    width: 100px; 
+}
+
+.backButton:hover {
+    background-color: var(--dourado);
+    color: #121212;
+    border-color: var(--dourado);
+}
+
+
+.content {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.cardGrid {
+    display: grid;
+    
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem; 
+}
+
+.barberCard {
+    background-color: var(--preto-card);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    border-left: 5px solid var(--dourado);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.barberCard h3 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--dourado);
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.infoItem {
+    font-size: 1rem;
+    color: #ccc;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.infoItem strong {
+    color: var(--branco);
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.bio {
+    font-size: 0.95rem;
+    color: #bbb;
+    margin: 0.5rem 0 0 0;
+    padding-top: 0.8rem;
+    border-top: 1px solid #444;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.error {
+    color: #ff6b6b;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+}

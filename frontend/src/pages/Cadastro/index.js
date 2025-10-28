@@ -1,13 +1,13 @@
-// src/pages/Cadastro/index.js
+
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Usamos o axios diretamente para o ViaCEP
-import api from '../../services/api'; // Nosso axios configurado para o backend
+import axios from 'axios'; 
+import api from '../../services/api'; 
 import styles from './Cadastro.module.css';
 
 function Cadastro() {
-    // States para todos os campos do formulário
+    
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -21,14 +21,14 @@ function Cadastro() {
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
 
-    // States para controle de UI
+    
     const [error, setError] = useState('');
     const [cepLoading, setCepLoading] = useState(false);
     const navigate = useNavigate();
 
-    // 1. LÓGICA DO ViaCEP
+    
     const handleCepBlur = async (e) => {
-        const currentCep = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+        const currentCep = e.target.value.replace(/\D/g, ''); 
         if (currentCep.length !== 8) {
             return;
         }
@@ -53,7 +53,7 @@ function Cadastro() {
         }
     };
 
-    // 2. LÓGICA DE SUBMISSÃO PARA O NOSSO BACKEND
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -83,7 +83,7 @@ function Cadastro() {
 
         } catch (err) {
             if (err.response && err.response.data) {
-                // Pega o erro específico do backend (ex: "E-mail já em uso")
+                
                 const errorMessage = typeof err.response.data === 'string' 
                     ? err.response.data 
                     : 'Erro ao realizar o cadastro. Verifique seus dados.';
@@ -95,9 +95,9 @@ function Cadastro() {
         }
     };
 
-    // 3. ESTRUTURA JSX DO FORMULÁRIO
+    
     return (
-        <div className={styles.tela}> {/* Reutilizando a classe 'tela' do Login para o background */}
+        <div className={styles.tela}> {}
             <div className={styles.container}>
                 <form onSubmit={handleSubmit}>
                     <h1>Criar Conta</h1>

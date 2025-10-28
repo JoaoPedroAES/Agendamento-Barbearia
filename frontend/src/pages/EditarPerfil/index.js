@@ -1,13 +1,10 @@
-// src/pages/EditarPerfil/index.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import api from '../../services/api';
-import styles from './EditarPerfil.module.css';
+import styles from './EditarPerfil.module.css'; 
 
 function EditarPerfil() {
-    // 1. STATE ÚNICO PARA O FORMULÁRIO
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -21,13 +18,11 @@ function EditarPerfil() {
         state: ''
     });
     
-    // States de controle da UI
     const [loading, setLoading] = useState(true);
     const [cepLoading, setCepLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // 2. BUSCA DADOS ATUAIS PARA PREENCHER O FORMULÁRIO
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -49,20 +44,17 @@ function EditarPerfil() {
 
             } catch (err) {
                 setError('Erro ao carregar seus dados. Tente novamente mais tarde.');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
         fetchUserData();
-    }, []); // Array vazio garante que rode apenas uma vez
+    }, []); 
     
-    // 3. FUNÇÃO GENÉRICA PARA ATUALIZAR O STATE DO FORMULÁRIO
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // 4. LÓGICA DO ViaCEP
     const handleCepBlur = async (e) => {
         const currentCep = e.target.value.replace(/\D/g, '');
         if (currentCep.length !== 8) return;
@@ -79,8 +71,11 @@ function EditarPerfil() {
                     street: response.data.logradouro,
                     neighborhood: response.data.bairro,
                     city: response.data.localidade,
-                    state: response.data.uf
+                    state: response.data.uf,
+                    complement: '', 
                 }));
+                
+                document.getElementsByName('number')[0].focus();
             }
         } catch (err) {
             setError('Erro ao buscar o CEP.');
@@ -88,8 +83,13 @@ function EditarPerfil() {
             setCepLoading(false);
         }
     };
+
     
-    // 5. LÓGICA DE SUBMISSÃO PARA ATUALIZAR
+    const handleVoltar = (e) => {
+        e.preventDefault();
+        navigate(-1); 
+    };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -99,16 +99,15 @@ function EditarPerfil() {
             navigate('/dashboard');
         } catch (err) {
             setError('Erro ao atualizar o perfil. Verifique os dados e tente novamente.');
-            console.error(err);
         }
     };
 
-    if (loading) return <p style={{color: 'white', textAlign: 'center'}}>Carregando perfil...</p>;
+    if (loading) return <div className={styles.page}><p style={{color: 'white', textAlign: 'center'}}>Carregando perfil...</p></div>;
 
-    // 6. ESTRUTURA JSX COMPLETA
+    
     return (
-        <div className={styles.tela}>
-            <div className={styles.container}>
+        <div className={styles.page}>
+            <div className={styles.formContainer}>
                 <form onSubmit={handleSubmit}>
                     <h1>Editar Perfil</h1>
                     
@@ -121,11 +120,11 @@ function EditarPerfil() {
                         <input type="email" name="email" value={formData.email} disabled />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label>Celular (Opcional)</label>
+                        <label>Celular / WhatsApp</label>
                         <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
                     </div>
 
-                    <hr style={{margin: '20px 0', borderColor: 'rgba(255,255,255,0.2)'}} />
+                    <hr className={styles.divider} />
                     
                     <div className={styles.inputGroup}>
                         <label>CEP {cepLoading && <span>(Buscando...)</span>}</label>
@@ -136,9 +135,9 @@ function EditarPerfil() {
                         <input type="text" name="street" value={formData.street} onChange={handleChange} required disabled={cepLoading} />
                     </div>
 
-                    <div className={styles.addressFields}>
-                        <div className={`${styles.inputGroup} ${styles.numberField}`}>
-                             <label>Nº</label>
+                    <div className={styles.row}>
+                        <div className={styles.inputGroup}>
+                            <label>Nº</label>
                             <input type="text" name="number" value={formData.number} onChange={handleChange} required disabled={cepLoading} />
                         </div>
                         <div className={styles.inputGroup}>
@@ -152,19 +151,28 @@ function EditarPerfil() {
                         <input type="text" name="neighborhood" value={formData.neighborhood} onChange={handleChange} required disabled={cepLoading} />
                     </div>
                     
-                    <div className={styles.addressFields}>
+                    <div className={styles.row}>
                         <div className={styles.inputGroup}>
                             <label>Cidade</label>
                             <input type="text" name="city" value={formData.city} onChange={handleChange} required disabled={cepLoading} />
                         </div>
-                        <div className={`${styles.inputGroup} ${styles.numberField}`}>
+                        <div className={styles.inputGroup} style={{ flex: '0.5' }}>
                             <label>UF</label>
-                            <input type="text" name="state" value={formData.state} onChange={handleChange} required disabled={cepLoading} />
+                            <input type="text" name="state" value={formData.state} onChange={handleChange} maxLength="2" required disabled={cepLoading} />
                         </div>
                     </div>
 
                     {error && <p className={styles.error}>{error}</p>}
-                    <button type="submit" className={styles.button}>Salvar Alterações</button>
+                    
+                    {}
+                    <div className={styles.buttonContainer}>
+                        <button type="button" onClick={handleVoltar} className={styles.backButton}>
+                            Voltar
+                        </button>
+                        <button type="submit" className={styles.saveButton}>
+                            Salvar Alterações
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

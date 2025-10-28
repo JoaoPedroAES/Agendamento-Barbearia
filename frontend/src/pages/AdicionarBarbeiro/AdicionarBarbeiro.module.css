@@ -120,3 +120,28 @@
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+.backLinkButton {
+  background: none; 
+  border: none; 
+  color: var(--branco); 
+  font-family: inherit; 
+  font-size: 14px; 
+  text-decoration: underline; 
+  cursor: pointer; 
+  padding: 5px; 
+  margin-top: 10px; 
+  transition: color 0.2s; 
+}
+
+.backLinkButton:hover {
+  color: var(--dourado); 
+}
+
+
+.loginLink { 
+  font-size: 15px;
+  text-align: center;
+  margin-top: 25px; 
+  margin-bottom: -10px; 
+}
