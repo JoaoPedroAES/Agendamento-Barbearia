@@ -3,6 +3,7 @@
 using barbearia.api.Data;
 using barbearia.api.Dtos;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,65 +15,62 @@ namespace barbearia.api.Controllers
     
     public class WorkScheduleController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public WorkScheduleController(AppDbContext context)
+        private readonly IWorkScheduleService _workScheduleService;
+
+        public WorkScheduleController(IWorkScheduleService workScheduleService) // <-- Recebe o serviço
         {
-            _context = context;
+            _workScheduleService = workScheduleService;
         }
 
-        
-        [HttpPost]
+
+        [HttpPost("batch")]
         [Authorize(Roles = "Admin,Barbeiro")]
-        public async Task<IActionResult> SetWorkSchedule([FromBody] SetWorkScheduleDto dto)
+        public async Task<IActionResult> SetBatchWorkSchedule([FromBody] List<SetWorkScheduleDto> scheduleList)
         {
-            
-            var schedule = await _context.WorkSchedules
-                .FirstOrDefaultAsync(s => s.BarberId == dto.BarberId && s.DayOfWeek == dto.DayOfWeek);
-
-            if (schedule == null)
+            // Validação básica
+            if (scheduleList == null || !scheduleList.Any())
             {
-                schedule = new WorkSchedule
-                {
-                    BarberId = dto.BarberId,
-                    DayOfWeek = dto.DayOfWeek,
-                    StartTime = dto.StartTime,
-                    EndTime = dto.EndTime,
-                    BreakStartTime = dto.BreakStartTime,
-                    BreakEndTime = dto.BreakEndTime
-                };
-                _context.WorkSchedules.Add(schedule);
+                return BadRequest("A lista de horários não pode ser vazia.");
             }
-            else
+            if (!ModelState.IsValid)
             {
-                schedule.StartTime = dto.StartTime;
-                schedule.EndTime = dto.EndTime;
-                schedule.BreakStartTime = dto.BreakStartTime;
-                schedule.BreakEndTime = dto.BreakEndTime;
+                return BadRequest(ModelState);
             }
 
-            await _context.SaveChangesAsync();
+            // TODO: Adicionar validação de segurança:
+            // Um Barbeiro só pode alterar o próprio horário (verificar user.BarberId vs dto.BarberId)
+            // Um Admin pode alterar qualquer um.
 
-            var scheduleWithBarber = await _context.WorkSchedules
-                .Include(s => s.Barber)
-                    .ThenInclude(b => b.UserAccount)
-                .FirstOrDefaultAsync(s => s.Id == schedule.Id);
-
-            return Ok(scheduleWithBarber);
+            try
+            {
+                await _workScheduleService.SetBatchWorkScheduleAsync(scheduleList);
+                return NoContent(); // 204 Sucesso
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message); // Erro nos horários enviados
+            }
+            catch (Exception ex)
+            {
+                // Logar erro ex
+                return StatusCode(500, "Erro ao salvar a agenda.");
+            }
         }
 
-        
         [HttpGet("{barberId:int}")]
         [Authorize]
         public async Task<IActionResult> GetSchedule(int barberId)
         {
-            
-            var schedules = await _context.WorkSchedules
-                .Where(s => s.BarberId == barberId)
-                .Include(s => s.Barber)
-                    .ThenInclude(b => b.UserAccount)
-                .ToListAsync();
-
-            return Ok(schedules);
+            try
+            {
+                var schedule = await _workScheduleService.GetScheduleByBarberIdAsync(barberId);
+                return Ok(schedule);
+            }
+            catch (Exception ex)
+            {
+                // Logar erro ex
+                return StatusCode(500, "Erro ao buscar horários.");
+            }
         }
     }
 }

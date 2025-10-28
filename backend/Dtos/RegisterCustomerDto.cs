@@ -31,5 +31,7 @@ namespace barbearia.api.Dtos
         public string City { get; set; }
         [Required]
         public string State { get; set; } // UF
+
+        public bool CreateAsAdmin { get; set; }
     }
 }

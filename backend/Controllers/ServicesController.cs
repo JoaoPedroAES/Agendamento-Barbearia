@@ -1,5 +1,6 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Models;
+using barbearia.api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,80 +13,77 @@ namespace barbearia.api.Controllers
     [ApiController]
     public class ServicesController : ControllerBase
     {
-        private readonly Data.AppDbContext _context;
+        private readonly IServicesService _servicesService;
 
-        // Construtor para Injeção de Dependência
-        public ServicesController(AppDbContext context) {
-            _context = context;
+        public ServicesController(IServicesService servicesService) // <-- Recebe o serviço
+        {
+            _servicesService = servicesService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Service>>> GetServices() { 
-        
-            var services = await _context.Services.ToListAsync();
+        public async Task<ActionResult<IEnumerable<Service>>> GetServices()
+        {
+            var services = await _servicesService.GetAllServicesAsync();
             return Ok(services);
-
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Service>> GetServiceId(int id) { 
-        
-            var service = await _context.Services.FindAsync(id);
-            if (service == null) {
-                return NotFound("Id do Serviço não encontrado");
+        public async Task<ActionResult<Service>> GetService(int id)
+        {
+            var service = await _servicesService.GetServiceByIdAsync(id);
+            if (service == null)
+            {
+                return NotFound(); // 404
             }
             return Ok(service);
         }
-
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Service>> CreateService(Service Service) {
-            _context.Services.Add(Service);
-            await _context.SaveChangesAsync();
+        [Authorize(Roles = "Admin,Barbeiro")]
+        public async Task<ActionResult<Service>> CreateService(Service service)
+        {
+            // Validação básica do modelo (pode ser mais robusta no serviço se necessário)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return CreatedAtAction(nameof(GetServiceId), new { id = Service.Id }, Service);
+            var createdService = await _servicesService.CreateServiceAsync(service);
+            // Retorna 201 Created com a rota para o novo recurso
+            return CreatedAtAction(nameof(GetService), new { id = createdService.Id }, createdService);
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateService(int id, Service serviceUpdate)
+        [Authorize(Roles = "Admin,Barbeiro")]
+        public async Task<IActionResult> UpdateService(int id, Service serviceInput)
         {
-            if (id != serviceUpdate.Id)
+            // Validação básica
+            if (id != serviceInput.Id) // Garante que o ID da rota e do corpo coincidem
             {
-                return BadRequest();
+                return BadRequest("O ID na URL deve ser igual ao ID no corpo da requisição.");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
-            var service = await _context.Services.FindAsync(id);
-            if (service == null)
+            var success = await _servicesService.UpdateServiceAsync(id, serviceInput);
+            if (!success)
             {
-                return NotFound();
+                return NotFound(); // 404 se o serviço não existir
             }
-
-            // Atualiza os campos
-            service.Name = serviceUpdate.Name;
-            service.Description = serviceUpdate.Description;
-            service.Price = serviceUpdate.Price;
-            service.DurationInMinutes = serviceUpdate.DurationInMinutes;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NoContent(); // 204 Sucesso (sem conteúdo no corpo da resposta)
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> DeleteService(int id)
         {
-            var service = await _context.Services.FindAsync(id);
-            if (service == null)
+            var success = await _servicesService.DeleteServiceAsync(id);
+            if (!success)
             {
-                return NotFound();
+                return NotFound(); // 404 se não encontrado
             }
-
-            _context.Services.Remove(service);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NoContent(); // 204 Sucesso
         }
 
     }
