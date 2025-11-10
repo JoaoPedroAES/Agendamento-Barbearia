@@ -74,6 +74,7 @@ builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBarberService, BarberService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 

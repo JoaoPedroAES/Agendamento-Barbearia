@@ -1,14 +1,12 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './Agendamento.module.css';
-
+import { FaArrowLeft } from 'react-icons/fa'; // <-- 1. IMPORTAR O ÍCONE
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { registerLocale } from  "react-datepicker";
+import { registerLocale } from "react-datepicker";
 import ptBR from 'date-fns/locale/pt-BR';
 registerLocale('pt-BR', ptBR); 
 
@@ -130,13 +128,20 @@ function Agendamento() {
         return barberSchedule.some(scheduleDay => scheduleDay.dayOfWeek === day);
     };
 
-    if (loading) return <p className={styles.loadingText}>Carregando...</p>;
+    if (loading) return <div className={styles.page}><p className={styles.loadingText}>Carregando...</p></div>;
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
     
     return (
         <div className={styles.page}>
-            <h1>Faça seu Agendamento</h1>
+            {/* --- 2. CABEÇALHO ATUALIZADO (TEMA ESCURO) --- */}
+            <header className={styles.header}>
+                <button onClick={() => navigate('/dashboard')} className={styles.backButton}>
+                    <FaArrowLeft /> Voltar
+                </button>
+                <h1>Faça seu Agendamento</h1>
+                <div style={{width: '100px'}}></div> {/* Espaçador */}
+            </header>
             
             <div className={styles.selectionContainer}>
                 {}
@@ -144,7 +149,8 @@ function Agendamento() {
                     <h2>1. Escolha o Barbeiro</h2>
                     {barbers.map(barber => (
                         <div 
-                            key={barber.userId} 
+                            // <-- 3. PEQUENA CORREÇÃO DE BUG (barber.barberId)
+                            key={barber.barberId} 
                             className={`${styles.item} ${selectedBarber === barber.barberId ? styles.selected : ''}`}
                             onClick={() => setSelectedBarber(barber.barberId)}
                         >

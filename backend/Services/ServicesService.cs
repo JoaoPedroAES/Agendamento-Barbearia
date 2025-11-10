@@ -1,4 +1,5 @@
 ﻿using barbearia.api.Data;
+using barbearia.api.Dtos;
 using barbearia.api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,32 +24,38 @@ namespace barbearia.api.Services
             return await _context.Services.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public async Task<Service> CreateServiceAsync(Service service)
+        public async Task<Service> CreateServiceAsync(CreateServiceDto dto)
         {
+            // Mapeia do DTO para o Modelo
+            var service = new Service
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                DurationInMinutes = dto.DurationInMinutes
+            };
+
             _context.Services.Add(service);
             await _context.SaveChangesAsync();
-            return service; // O ID será preenchido pelo EF Core
+            return service; // Retorna o novo serviço criado
         }
 
-        public async Task<bool> UpdateServiceAsync(int id, Service serviceInput)
+        public async Task<Service> UpdateServiceAsync(int id, UpdateServiceDto dto)
         {
-            var existingService = await _context.Services.FindAsync(id);
-            if (existingService == null)
+            var service = await _context.Services.FindAsync(id);
+            if (service == null)
             {
-                return false; // Não encontrado
+                return null; // Retorna nulo se não encontrar
             }
 
-            // Atualiza apenas as propriedades permitidas (evita overposting)
-            existingService.Name = serviceInput.Name;
-            existingService.Description = serviceInput.Description;
-            existingService.Price = serviceInput.Price;
-            existingService.DurationInMinutes = serviceInput.DurationInMinutes;
-
-            // Marca a entidade como modificada (alternativa ao Attach/Entry)
-            _context.Services.Update(existingService);
+            // Mapeia os dados do DTO para o modelo existente
+            service.Name = dto.Name;
+            service.Description = dto.Description;
+            service.Price = dto.Price;
+            service.DurationInMinutes = dto.DurationInMinutes;
 
             await _context.SaveChangesAsync();
-            return true; // Sucesso
+            return service;
         }
 
         public async Task<bool> DeleteServiceAsync(int id)

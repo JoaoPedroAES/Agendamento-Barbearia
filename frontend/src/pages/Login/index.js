@@ -5,8 +5,6 @@ import { FaUser, FaLock } from "react-icons/fa";
 
 import { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api'; 
-
 
 import { useAuth } from '../../context/AuthContext'; 
 
@@ -76,10 +74,6 @@ function Login(){
                         <FaLock className={styles.icon} />
                     </div>
                     <div className={styles.recallforget}>
-                        <label>
-                            <input type="checkbox" />
-                            Lembrar Senha
-                        </label>
                         <a href="/forgot-password">Esqueceu a senha?</a>
                     </div>
                     <button>Login</button>
