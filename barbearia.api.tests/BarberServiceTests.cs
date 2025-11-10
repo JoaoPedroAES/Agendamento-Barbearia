@@ -177,7 +177,7 @@ namespace barbearia.api.tests
             Assert.Equal("novo@teste.com", barbeiroDoBanco.UserAccount.Email);
         }
 
-        // --- TESTE 7 (CORRIGIDO) ---
+        // --- TESTE 7 ---
         [Fact]
         public async Task CreateBarberAsync_DeveCriarBarbeiroERetornarDto()
         {
@@ -191,16 +191,12 @@ namespace barbearia.api.tests
                 Bio = "Eu sou novo"
             };
 
-            // Mock do UserManager
             _mockUserManager.Setup(um => um.FindByEmailAsync("novo@teste.com")).ReturnsAsync((ApplicationUser)null); 
             
-            // ▼▼▼ CORREÇÃO AQUI ▼▼▼
-            // Adicionamos um .Callback() para simular o UserManager
-            // preenchendo o ID do novo usuário (o que ele faz de verdade)
             _mockUserManager.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), "Senha123!"))
                 .Callback<ApplicationUser, string>((user, pass) => 
                 {
-                    user.Id = "fake-user-id-123"; // Simula o Identity gerando um ID
+                    user.Id = "fake-user-id-123"; 
                 })
                 .ReturnsAsync(IdentityResult.Success);
             
@@ -215,8 +211,7 @@ namespace barbearia.api.tests
             Assert.Equal("novo@teste.com", resultado.Email);
             Assert.False(resultado.HasAcceptedTerms); 
             
-            // Verifica se o BARBEIRO foi salvo no banco
-            Assert.Equal(1, await _context.Barbers.CountAsync()); // Esta linha (219) deve passar agora
+            Assert.Equal(1, await _context.Barbers.CountAsync()); 
             Assert.Equal("fake-user-id-123", (await _context.Barbers.FirstAsync()).ApplicationUserId);
         }
 
@@ -234,6 +229,49 @@ namespace barbearia.api.tests
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateBarberAsync(dto));
             
             Assert.Equal("Este e-mail já está em uso.", exception.Message);
+        }
+
+        // --- ▼▼▼ TESTES NOVOS ADICIONADOS ▼▼▼ ---
+
+        // --- TESTE 9 ---
+        [Fact]
+        public async Task UpdateBarberAsync_DeveLancarExcecao_QuandoEmailNovoJaEstaEmUso()
+        {
+            // 1. Arrange
+            await SeedDatabaseAsync(); // Cria user1 (teste@teste.com)
+            
+            // Cria um segundo usuário/barbeiro que já possui o e-mail desejado
+            var user2 = new ApplicationUser { Id = "user2", FullName = "Usuario Conflitante", Email = "conflito@teste.com" };
+            _context.Users.Add(user2);
+            await _context.SaveChangesAsync();
+
+            var dto = new UpdateBarberDto 
+            { 
+                FullName = "Nome Novo", 
+                Email = "conflito@teste.com" // Tenta mudar para o e-mail do user2
+            };
+
+            // Mock do FindByEmailAsync para retornar o user2 (conflito)
+            _mockUserManager.Setup(um => um.FindByEmailAsync("conflito@teste.com")).ReturnsAsync(user2);
+
+            // 2. Act & 3. Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateBarberAsync(1, dto));
+            
+            Assert.Equal("O novo e-mail fornecido já está em uso.", exception.Message);
+        }
+
+        // --- TESTE 10 ---
+        [Fact]
+        public async Task DeactivateBarberAsync_DeveRetornarFalse_QuandoBarbeiroNaoEncontrado()
+        {
+            // 1. Arrange
+            // Banco está vazio
+
+            // 2. Act
+            var resultado = await _service.DeactivateBarberAsync(99); // ID 99 não existe
+
+            // 3. Assert
+            Assert.False(resultado);
         }
     }
 }

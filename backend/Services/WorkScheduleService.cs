@@ -2,6 +2,10 @@
 using barbearia.api.Dtos;
 using barbearia.api.Models;
 using Microsoft.EntityFrameworkCore;
+using System; // Adicionado
+using System.Collections.Generic; // Adicionado
+using System.Linq; // Adicionado
+using System.Threading.Tasks; // Adicionado
 
 namespace barbearia.api.Services
 {
@@ -29,8 +33,6 @@ namespace barbearia.api.Services
         {
             if (scheduleList == null || !scheduleList.Any())
             {
-                // Pode lançar exceção ou apenas retornar, dependendo da regra de negócio
-                // throw new ArgumentException("A lista de horários não pode ser vazia.");
                 return;
             }
 
@@ -46,11 +48,19 @@ namespace barbearia.api.Services
 
             foreach (var dto in scheduleList)
             {
-                // Validação básica (pode ser mais robusta)
-                if (dto.StartTime >= dto.EndTime || dto.BreakStartTime >= dto.BreakEndTime)
+                // --- ▼▼▼ LÓGICA DE VALIDAÇÃO CORRIGIDA ▼▼▼ ---
+                // 1. Valida o horário de trabalho
+                if (dto.StartTime >= dto.EndTime)
                 {
                     throw new ArgumentException($"Horários inválidos para {dto.DayOfWeek}.");
                 }
+
+                // 2. Valida a pausa (só se for uma pausa real, não 00:00)
+                if (dto.BreakStartTime >= dto.BreakEndTime && dto.BreakEndTime != TimeSpan.Zero)
+                {
+                    throw new ArgumentException($"Horários de pausa inválidos para {dto.DayOfWeek}.");
+                }
+                // --- ▲▲▲ FIM DA CORREÇÃO ▲▲▲ ---
 
                 var existing = existingSchedules.FirstOrDefault(s => s.DayOfWeek == dto.DayOfWeek);
                 if (existing != null)
