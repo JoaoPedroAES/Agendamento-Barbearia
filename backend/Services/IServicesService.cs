@@ -1,4 +1,5 @@
-﻿using barbearia.api.Models;
+﻿using barbearia.api.Dtos;
+using barbearia.api.Models;
 
 namespace barbearia.api.Services
 {
@@ -6,8 +7,8 @@ namespace barbearia.api.Services
     {
         Task<IEnumerable<Service>> GetAllServicesAsync();
         Task<Service?> GetServiceByIdAsync(int id);
-        Task<Service> CreateServiceAsync(Service service);
-        Task<bool> UpdateServiceAsync(int id, Service serviceInput);
+        Task<Service> CreateServiceAsync(CreateServiceDto dto);
+        Task<Service> UpdateServiceAsync(int id, UpdateServiceDto dto);
         Task<bool> DeleteServiceAsync(int id);
     }
 }

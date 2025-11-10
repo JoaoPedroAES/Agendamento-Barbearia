@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link} from 'react-router-dom';
 import axios from 'axios'; 
 import api from '../../services/api'; 
 import styles from './Cadastro.module.css';
@@ -20,6 +20,7 @@ function Cadastro() {
     const [neighborhood, setNeighborhood] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     
     const [error, setError] = useState('');
@@ -115,7 +116,7 @@ function Cadastro() {
                         <input type="password" placeholder="Confirmar Senha" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
                     </div>
                     <div className={styles.inputGroup}>
-                        <input type="tel" placeholder="Celular (Opcional)" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
+                        <input type="tel" placeholder="Celular" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
                     </div>
 
                     <hr style={{margin: '20px 0', borderColor: 'rgba(255,255,255,0.2)'}} />
@@ -152,11 +153,25 @@ function Cadastro() {
                     </div>
                     
                     {error && <p className={styles.error}>{error}</p>}
-                    
-                    <button type="submit" className={styles.button}>Cadastrar</button>
+                    <div className={styles.termsGroup}>
+                        <input
+                            type="checkbox"
+                            id="terms"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                        />
+                        <label htmlFor="terms">
+                            Eu li e aceito os <Link to="/termos-de-uso" className={styles.termsLink}>Termos de Uso</Link>.
+                        </label>
+                    </div>
 
-                    <div className={styles.loginLink}>
-                        <p>Já tem uma conta? <a href="/login">Faça Login</a></p>
+                    <button type="submit" className={styles.button} disabled={!termsAccepted}>Cadastrar</button>
+
+                    <div className={styles.loginRedirect}>
+                        Já tem uma conta? 
+                        <Link to="/login" className={styles.loginLink}>
+                            Faça Login
+                        </Link>
                     </div>
 
                 </form>

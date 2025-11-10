@@ -13,6 +13,8 @@
  import EditarBarbeiro from './pages/EditarBarbeiro';
  import GerenciarServicos from './pages/GerenciarServicos';
  import ListarBarbeiros from './pages/ListarBarbeiros';
+ import TermosDeUso from './pages/TermosDeUso';
+ import TermosBarbeiro from './pages/TermosBarbeiro';
 
  function AppRoutes(){
      return (
@@ -22,6 +24,7 @@
              <Route path="/" element={<Inicio />}></Route>
              <Route path="/login" element={<Login/>}></Route>
              <Route path="/registrar" element={<Cadastro/>}></Route>
+             <Route path="/termos-de-uso" element={<TermosDeUso />}></Route>
 
              {}
              <Route 
@@ -52,6 +55,10 @@
              <Route
                path="/servicos"
                element={<PrivateRoute><GerenciarServicos /></PrivateRoute>}
+             />
+             <Route 
+                path="/termos-barbeiro" 
+                element={<PrivateRoute><TermosBarbeiro /></PrivateRoute>}
              />
              <Route
                path="/barbeiros"

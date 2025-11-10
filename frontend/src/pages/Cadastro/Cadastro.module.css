@@ -120,3 +120,94 @@
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+.termsGroup {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    gap: 10px; /* Espaço entre o checkbox e o texto */
+}
+
+.termsGroup input[type="checkbox"] {
+    /* Remove estilos padrão */
+    -webkit-appearance: none;
+    appearance: none;
+    
+    /* Define o tamanho */
+    width: 18px;
+    height: 18px;
+    
+    /* Estilo da caixa */
+    border: 2px solid var(--dourado);
+    border-radius: 3px;
+    background-color: var(--preto-input);
+    cursor: pointer;
+    
+    /* Posicionamento do "check" */
+    position: relative;
+    display: grid;
+    place-content: center;
+}
+
+.termsGroup input[type="checkbox"]::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: var(--dourado);
+    transform: scale(0); /* Começa invisível */
+    transition: 120ms transform ease-in-out;
+    border-radius: 2px;
+}
+
+.termsGroup input[type="checkbox"]:checked::before {
+    transform: scale(1); /* Aparece quando marcado */
+}
+
+.termsGroup label {
+    font-size: 0.95rem;
+    color: var(--cinza-texto);
+    margin: 0;
+    cursor: pointer;
+}
+
+.termsLink {
+    color: var(--dourado);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* Estilo para o botão quando estiver desabilitado */
+/* (Assumindo que sua classe de botão é .submitButton) */
+.submitButton:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
+    border: none;
+}
+
+.loginRedirect {
+    width: 100%;
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: var(--cinza-texto); /* Cor cinza para a pergunta */
+}
+
+/* O link "Faça Login" */
+.loginLink {
+    color: var(--dourado); /* <-- A COR DOURADA QUE VOCÊ PEDIU */
+    font-weight: 600; /* <-- Deixa em negrito para destacar */
+    text-decoration: none; /* <-- Tira o sublinhado padrão */
+    margin-left: 8px; /* <-- Um pequeno espaço */
+    transition: all 0.2s;
+}
+
+/* Efeito ao passar o mouse */
+.loginLink:hover {
+    text-decoration: underline; /* <-- Adiciona sublinhado ao passar o mouse */
+    filter: brightness(1.2); /* <-- Deixa um pouco mais brilhante */
+}

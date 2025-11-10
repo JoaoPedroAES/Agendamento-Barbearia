@@ -37,8 +37,9 @@ namespace barbearia.api.Services
         public async Task<BarberProfileDto> GetBarberByIdAsync(int barberId)
         {
             var barber = await _context.Barbers
-                .Include(b => b.UserAccount) // Inclui os dados do usuário
-                .FirstOrDefaultAsync(b => b.Id == barberId); // Busca pelo ID
+                .Include(b => b.UserAccount)
+                .AsNoTracking() // <--- ESTA É A CORREÇÃO
+                .FirstOrDefaultAsync(b => b.Id == barberId);
 
             if (barber == null)
             {
@@ -53,7 +54,8 @@ namespace barbearia.api.Services
                 FullName = barber.UserAccount.FullName,
                 Email = barber.UserAccount.Email,
                 PhoneNumber = barber.UserAccount.PhoneNumber,
-                Bio = barber.Bio
+                Bio = barber.Bio,
+                HasAcceptedTerms = barber.HasAcceptedTerms // <-- Importante!
             };
         }
 
@@ -89,7 +91,8 @@ namespace barbearia.api.Services
             {
                 ApplicationUserId = newUser.Id,
                 Bio = dto.Bio ?? string.Empty,
-                IsActive = true // Novo barbeiro começa ativo
+                IsActive = true, // Novo barbeiro começa ativo
+                HasAcceptedTerms = false
             };
             _context.Barbers.Add(barberProfile);
             await _context.SaveChangesAsync();
@@ -109,8 +112,8 @@ namespace barbearia.api.Services
         public async Task<bool> UpdateBarberAsync(int barberId, UpdateBarberDto dto)
         {
             var barberProfile = await _context.Barbers
-                                    .Include(b => b.UserAccount)
-                                    .FirstOrDefaultAsync(b => b.Id == barberId);
+                                        .Include(b => b.UserAccount)
+                                        .FirstOrDefaultAsync(b => b.Id == barberId);
             if (barberProfile == null) return false;
 
             // Atualiza Perfil (Barber)
@@ -131,11 +134,15 @@ namespace barbearia.api.Services
                 }
                 await _userManager.SetEmailAsync(user, dto.Email);
                 await _userManager.SetUserNameAsync(user, dto.Email);
+
+                // ▼▼▼ LINHAS FALTANTES ADICIONADAS AQUI ▼▼▼
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
                 user.EmailConfirmed = true; // Reconfirma
             }
 
             // Salva
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // <-- Agora isso vai salvar o e-mail novo
             var userUpdateResult = await _userManager.UpdateAsync(user);
 
             return userUpdateResult.Succeeded;
@@ -158,6 +165,19 @@ namespace barbearia.api.Services
                 await _userManager.UpdateAsync(user);
             }
 
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> AcceptTermsAsync(int barberId)
+        {
+            var barberProfile = await _context.Barbers.FindAsync(barberId);
+            if (barberProfile == null)
+            {
+                return false;
+            }
+
+            barberProfile.HasAcceptedTerms = true;
             await _context.SaveChangesAsync();
             return true;
         }

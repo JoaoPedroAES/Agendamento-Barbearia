@@ -1,12 +1,9 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { Link } from 'react-router-dom'; 
 import styles from './ManagementDashboard.module.css';
 import { useAuth } from '../../context/AuthContext'; 
-
 
 import { FaCog } from 'react-icons/fa'; 
 
@@ -39,6 +36,26 @@ function ManagementDashboard() {
     const ownBarberId = user?.barberId; 
 
     
+    useEffect(() => {
+        if (user && ownBarberId) {
+            if (isAdmin) return; 
+            
+            const checkTerms = async () => {
+                try {
+                    const response = await api.get(`/api/Barber/${ownBarberId}`);
+                    const barberProfile = response.data;
+                    if (barberProfile.hasAcceptedTerms === false) {
+                        navigate('/termos-barbeiro');
+                    }
+                } catch (err) {
+                    console.error("Erro ao verificar aceite dos termos:", err);
+                    logout(); 
+                }
+            };
+            checkTerms();
+        }
+    }, [user, ownBarberId, navigate, logout, isAdmin]); 
+
 
     
     useEffect(() => {
@@ -67,7 +84,6 @@ function ManagementDashboard() {
             setLoadingAgenda(true);
             setError('');
             try {
-                
                 const response = await api.get(`/api/appointments/agenda?date=${selectedDate}`);
                 setAgenda(response.data);
             } catch (err) {
@@ -82,22 +98,16 @@ function ManagementDashboard() {
 
     
     useEffect(() => {
-        
-        
         const barberIdToFetch = isAdmin && filterBarberId ? filterBarberId : ownBarberId;
-
-        
         if (!isStaff || !barberIdToFetch) {
             setSchedule({}); 
             setLoadingSchedule(false);
             return;
         }
-
         setLoadingSchedule(true);
         setError(''); 
         api.get(`/api/work-schedule/${barberIdToFetch}`)
             .then(res => {
-                
                 const scheduleObject = res.data.reduce((acc, day) => {
                     acc[day.dayOfWeek] = {
                         startTime: day.startTime.substring(0, 5),
@@ -108,7 +118,6 @@ function ManagementDashboard() {
                     };
                     return acc;
                 }, {});
-                
                 daysOfWeek.forEach((_, index) => {
                     if (!scheduleObject[index]) {
                         scheduleObject[index] = { ...initialDayState };
@@ -121,7 +130,6 @@ function ManagementDashboard() {
                  console.error("Erro horários:", err);
             })
             .finally(() => setLoadingSchedule(false));
-
     }, [ownBarberId, filterBarberId, isAdmin, isStaff]); 
 
 
@@ -132,20 +140,7 @@ function ManagementDashboard() {
         navigate('/login');
     };
 
-    const handleDeleteAccount = async () => {
-        if (window.confirm('Você tem certeza que deseja deletar sua conta? Esta ação é irreversível.')) {
-            try {
-                
-                alert('Sua conta foi deletada com sucesso.');
-                handleLogout();
-            } catch (err) {
-                setError('Não foi possível deletar sua conta.');
-                console.error(err);
-            } finally {
-                setMenuOpen(false);
-            }
-        }
-    };
+    // 'handleDeleteAccount' foi removida
 
     
     const handleDayToggle = (dayIndex) => {
@@ -171,33 +166,26 @@ function ManagementDashboard() {
     const handleSaveSchedule = async (e) => {
          e.preventDefault();
          setError(''); 
-         
          const barberIdToSave = isAdmin && filterBarberId ? filterBarberId : ownBarberId;
          if (!barberIdToSave) {
              setError("Nenhum barbeiro selecionado para salvar a agenda.");
              return;
          }
          try {
-             
              const scheduleList = Object.entries(schedule)
-                 
                  .filter(([, dayData]) => dayData.isActive) 
                  .map(([dayIndex, dayData]) => ({
                      barberId: parseInt(barberIdToSave),
                      dayOfWeek: parseInt(dayIndex),
-                     
                      startTime: `${dayData.startTime || '00:00'}:00`,
                      endTime: `${dayData.endTime || '00:00'}:00`,
                      breakStartTime: `${dayData.breakStartTime || '00:00'}:00`,
                      breakEndTime: `${dayData.breakEndTime || '00:00'}:00`,
                  }));
-            
-             
              await api.post('/api/work-schedule/batch', scheduleList);
              alert('Horários salvos com sucesso!');
              setEditingSchedule(false); 
          } catch (err) {
-              
               setError(err.response?.data?.title || err.response?.data || 'Erro ao salvar horários.');
               console.error("Erro ao salvar horários:", err);
          }
@@ -213,17 +201,16 @@ function ManagementDashboard() {
     const filteredAgenda = isAdmin && filterBarberId
         ? agenda.filter(app => app.barberId == filterBarberId)
         : agenda;
-
     
     
     if (loadingInitial || !user) return <div className={styles.page}><p>Carregando...</p></div>;
 
     return (
         <div className={styles.page}>
-            {}
+            
             <header className={styles.header}>
                 <h1>Painel de Gestão</h1>
-                <div style={{ display: 'flex', alignItems: 'center' }}> {}
+                <div style={{ display: 'flex', alignItems: 'center' }}> 
                     <span className={styles.welcomeMessage}>Bem-vindo(a), <strong>{user.fullName}!</strong></span>
                     <div className={styles.settingsMenu}>
                         <button onClick={() => setMenuOpen(!menuOpen)} className={styles.gearButton}>
@@ -232,9 +219,9 @@ function ManagementDashboard() {
                         {menuOpen && (
                             <div className={styles.dropdown}>
                                 {isStaff && ( <button onClick={() => navigateAndClose('/barbeiros')}>Barbeiros</button> )}
-                                {isStaff && ( <button onClick={() => navigateAndClose('/adicionar-barbeiro')}>Adicionar Barbeiro</button> )}
+                                {isAdmin && ( <button onClick={() => navigateAndClose('/adicionar-barbeiro')}>Adicionar Barbeiro</button> )}
                                 <button onClick={() => navigateAndClose(isStaff ? '/editar-barbeiro' : '/perfil')}>Editar Perfil</button>
-                                <button onClick={handleDeleteAccount} style={{color: 'red'}}>Deletar Conta</button>
+                                {/* Botão Deletar Conta foi removido מכאן */}
                                 <hr style={{borderColor: '#444', margin: '5px 0'}} />
                                 <button onClick={handleLogout}>Sair</button>
                             </div>
@@ -242,13 +229,11 @@ function ManagementDashboard() {
                     </div>
                 </div>
             </header>
-
-            {}
+            
             {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '1rem' }}>{error}</p>}
-
-            {}
+            
             <div className={styles.mainGrid}>
-                {}
+                
                 <section className={styles.agendaSection}>
                     <h2>Agenda do Dia</h2>
                     <div className={styles.agendaControls}>
@@ -268,45 +253,41 @@ function ManagementDashboard() {
                         <div className={styles.appointmentList}>
                             {filteredAgenda.length > 0 ? filteredAgenda.map(app => (
                                 <div key={app.id} className={styles.appointmentCard}>
-                                    {}
                                     <h3>{new Date(app.startDateTime).toLocaleTimeString('pt-BR', {timeZone: 'UTC', hour: '2-digit', minute: '2-digit'})}</h3>
                                     <p><strong>Cliente:</strong> {app.customer.fullName}</p>
-                                    {}
                                     {isAdmin && !filterBarberId && <p><strong>Barbeiro:</strong> {app.barber?.userAccount?.fullName || 'N/A'}</p>}
                                     <p><strong>Serviços:</strong> {app.services.map(s => s.name).join(', ')}</p>
                                     <p><strong>Status:</strong> {app.status === 0 ? 'Agendado' : 'Cancelado'}</p>
-                                    {}
                                 </div>
                             )) : <p>Nenhum agendamento para este dia{filterBarberId ? ' para este barbeiro' : ''}.</p>}
                         </div>
                     )}
                 </section>
-
-                {}
+                
                 <section className={styles.actionsSection}>
                     <h2>Ações Rápidas</h2>
-                    {}
-                    <button className={styles.actionButton} onClick={() => setEditingSchedule(!editingSchedule)}>
-                        {editingSchedule ? 'Fechar Edição de Horários' : (isAdmin && filterBarberId ? `Editar Horários (${allBarbers.find(b => b.barberId == filterBarberId)?.fullName || 'Selecionado'})` : 'Editar Meus Horários')}
-                    </button>
-                    {}
-                    {isStaff && (
+                    
+                    {/* --- 1. BOTÃO DE HORÁRIOS SÓ APARECE SE FOR BARBEIRO OU ADMIN COM FILTRO --- */}
+                    {((isStaff && !isAdmin) || (isAdmin && filterBarberId)) && (
+                        <button className={styles.actionButton} onClick={() => setEditingSchedule(!editingSchedule)}>
+                            {editingSchedule ? 'Fechar Edição de Horários' : (isAdmin && filterBarberId ? `Editar Horários (${allBarbers.find(b => b.barberId == filterBarberId)?.fullName || 'Selecionado'})` : 'Editar Meus Horários')}
+                        </button>
+                    )}
+                    
+                    {isAdmin && (
                          <button className={styles.actionButton} onClick={() => navigate('/adicionar-barbeiro')}>Adicionar Barbeiro</button>
                     )}
                      
-                    {}
-                    {}
                     {isStaff && (
                          <Link to="/servicos" className={styles.actionButton}>
                              Gerenciar Serviços
                          </Link>
                     )}
-
-                    {}
-                    {editingSchedule && (
+                    
+                    {/* --- 2. FORMULÁRIO DE HORÁRIOS SÓ APARECE SE FOR BARBEIRO OU ADMIN COM FILTRO --- */}
+                    {editingSchedule && ((isStaff && !isAdmin) || (isAdmin && filterBarberId)) && (
                         <form className={styles.scheduleContainer} onSubmit={handleSaveSchedule}>
                             <h3>
-                                {}
                                 {isAdmin && filterBarberId
                                     ? `Editando horários de ${allBarbers.find(b => b.barberId == filterBarberId)?.fullName}`
                                     : "Meus Horários de Trabalho"
@@ -323,14 +304,14 @@ function ManagementDashboard() {
                                                 <input type="checkbox" checked={isActive} onChange={() => handleDayToggle(index)} />
                                                 {dayName}
                                             </label>
-                                            {}
+                                            
                                             <div className={styles.timeInputs}>
                                                 <input type="time" value={dayData.startTime} disabled={!isActive} onChange={(e) => handleTimeChange(index, 'startTime', e.target.value)} />
                                                 <span>-</span>
                                                 <input type="time" value={dayData.endTime} disabled={!isActive} onChange={(e) => handleTimeChange(index, 'endTime', e.target.value)} />
                                             </div>
-                                             {}
-                                             <div className={styles.timeInputs} style={{marginLeft: 'auto'}}> {}
+                                             
+                                             <div className={styles.timeInputs} style={{marginLeft: 'auto'}}> 
                                                  <span>Pausa:</span>
                                                  <input type="time" value={dayData.breakStartTime} disabled={!isActive} onChange={(e) => handleTimeChange(index, 'breakStartTime', e.target.value)} />
                                                  <span>-</span>
@@ -340,13 +321,13 @@ function ManagementDashboard() {
                                     );
                                 })
                             )}
-                            {}
+                            
                             <button type="submit" className={styles.saveScheduleButton} disabled={loadingSchedule}>Salvar Horários</button>
                         </form>
                     )}
                 </section>
             </div>
-            {}
+            
         </div>
     );
 }

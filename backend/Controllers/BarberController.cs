@@ -1,4 +1,4 @@
-﻿using barbearia.api.Data;
+﻿using barbearia.api.Data; // <-- 1. ADICIONE ESTE 'USING'
 using barbearia.api.Dtos;
 using barbearia.api.Models;
 using barbearia.api.Services;
@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SendGrid.Helpers.Mail;
+using System.Security.Claims;
 
 namespace barbearia.api.Controllers
 {
@@ -15,10 +17,13 @@ namespace barbearia.api.Controllers
     public class BarberController : ControllerBase
     {
         private readonly IBarberService _barberService;
+        private readonly AppDbContext _context; // <-- 2. ADICIONE ESTE CAMPO
 
-        public BarberController(IBarberService barberService)
+        // 3. ATUALIZE O CONSTRUTOR PARA RECEBER O AppDbContext
+        public BarberController(IBarberService barberService, AppDbContext context)
         {
             _barberService = barberService;
+            _context = context; // <-- 4. ATRIBUA O CAMPO
         }
 
         [HttpGet]
@@ -73,6 +78,34 @@ namespace barbearia.api.Controllers
                 // Logar erro ex
                 return StatusCode(500, "Erro interno ao criar barbeiro.");
             }
+        }
+
+        [HttpPost("accept-terms")]
+        [Authorize(Roles = "Barbeiro,Admin")]
+        public async Task<IActionResult> AcceptTerms()
+        {
+            // Pega o ID do usuário logado (pelo token)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            // Encontra o perfil de barbeiro associado a esse usuário
+            // AGORA ESTA LINHA VAI FUNCIONAR:
+            var barber = await _context.Barbers.FirstOrDefaultAsync(b => b.ApplicationUserId == userId);
+
+            if (barber == null)
+            {
+                return NotFound("Perfil de barbeiro não encontrado.");
+            }
+
+            var result = await _barberService.AcceptTermsAsync(barber.Id);
+            if (result)
+            {
+                return Ok(new { message = "Termos aceitos com sucesso." });
+            }
+            return BadRequest("Não foi possível salvar o aceite dos termos.");
         }
 
         [HttpPut("{id}")]

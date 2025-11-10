@@ -1,6 +1,7 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Models;
 using barbearia.api.Services;
+using barbearia.api.Dtos; // <-- 1. IMPORTE OS DTOs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ namespace barbearia.api.Controllers
     {
         private readonly IServicesService _servicesService;
 
-        public ServicesController(IServicesService servicesService) // <-- Recebe o serviço
+        public ServicesController(IServicesService servicesService)
         {
             _servicesService = servicesService;
         }
@@ -23,6 +24,7 @@ namespace barbearia.api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Service>>> GetServices()
         {
+            // Corrigido para o nome do método na interface
             var services = await _servicesService.GetAllServicesAsync();
             return Ok(services);
         }
@@ -37,41 +39,41 @@ namespace barbearia.api.Controllers
             }
             return Ok(service);
         }
+
         [HttpPost]
         [Authorize(Roles = "Admin,Barbeiro")]
-        public async Task<ActionResult<Service>> CreateService(Service service)
+        // 2. ALTERADO para CreateServiceDto
+        public async Task<ActionResult<Service>> CreateService(CreateServiceDto dto)
         {
-            // Validação básica do modelo (pode ser mais robusta no serviço se necessário)
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var createdService = await _servicesService.CreateServiceAsync(service);
-            // Retorna 201 Created com a rota para o novo recurso
+            // 3. ALTERADO para passar o DTO
+            var createdService = await _servicesService.CreateServiceAsync(dto);
             return CreatedAtAction(nameof(GetService), new { id = createdService.Id }, createdService);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Barbeiro")]
-        public async Task<IActionResult> UpdateService(int id, Service serviceInput)
+        // 4. ALTERADO para UpdateServiceDto
+        public async Task<IActionResult> UpdateService(int id, UpdateServiceDto dto)
         {
-            // Validação básica
-            if (id != serviceInput.Id) // Garante que o ID da rota e do corpo coincidem
-            {
-                return BadRequest("O ID na URL deve ser igual ao ID no corpo da requisição.");
-            }
+            // 5. REMOVIDO o "if (id != serviceInput.Id)" (DTO não tem ID)
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var success = await _servicesService.UpdateServiceAsync(id, serviceInput);
-            if (!success)
+            // 6. ALTERADO para passar o DTO
+            var updatedService = await _servicesService.UpdateServiceAsync(id, dto);
+            if (updatedService == null)
             {
                 return NotFound(); // 404 se o serviço não existir
             }
-            return NoContent(); // 204 Sucesso (sem conteúdo no corpo da resposta)
+            return NoContent(); // 204 Sucesso
         }
 
         [HttpDelete("{id}")]
