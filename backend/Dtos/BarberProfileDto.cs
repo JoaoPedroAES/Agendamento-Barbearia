@@ -8,5 +8,6 @@
         public string Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string Bio { get; set; }
+        public bool HasAcceptedTerms { get; set; }
     }
 }

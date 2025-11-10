@@ -1,10 +1,10 @@
-
 :root {
     font-family: 'Oswald', sans-serif;
     --dourado: #D4AF37; 
     --branco: #ffffff;
     --preto-fundo: #1f1f1f;
     --preto-card: #2a2a2a;
+    --vermelho: #e74c3c; /* <-- 1. ADIÇÃO DA VARIÁVEL */
 }
 
 .page {
@@ -77,6 +77,7 @@
     flex-direction: column;
     gap: 0.8rem; 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative; /* <-- 2. ADIÇÃO DA POSIÇÃO */
 }
 
 .barberCard h3 {
@@ -86,6 +87,7 @@
     margin: 0 0 0.5rem 0;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #444;
+    padding-right: 25px; /* <-- 3. ADIÇÃO DO PADDING */
 }
 
 .infoItem {
@@ -116,4 +118,23 @@
     text-align: center;
     font-size: 1.2rem;
     font-weight: 500;
+}
+
+/* --- 4. ADIÇÃO DOS ESTILOS DO BOTÃO --- */
+.deleteButton {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #888; /* Cor cinza sutil */
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s ease-in-out;
+}
+
+.deleteButton:hover {
+    color: var(--vermelho); /* Cor vermelha ao passar o mouse */
+    transform: scale(1.2);
 }

@@ -1,92 +1,259 @@
+/* src/pages/Agendamento/Agendamento.module.css */
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+    --branco: #ffffff;
+    --preto-fundo: #1f1f1f;
+    --preto-card: #2a2a2a;
+    --preto-input: #333;
+    --cinza-borda: #555;
+    --cinza-texto: #ccc;
+    --vermelho: #e74c3c;
+}
 
 .page {
-    padding: 2rem;
-    background-color: #f4f7f6;
+    padding: 2rem 4rem;
+    background-color: var(--preto-fundo);
+    color: var(--branco);
+    min-height: 100vh;
 }
 
-.page h1 {
+/* --- Cabeçalho (Padrão) --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
     text-align: center;
-    margin-bottom: 2rem;
-    color: #333;
 }
 
+.backButton {
+    background: none;
+    border: 1px solid var(--branco);
+    color: var(--branco);
+    padding: 0.5rem 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    width: 100px;
+}
+
+.backButton:hover {
+    background-color: var(--dourado);
+    color: #121212;
+    border-color: var(--dourado);
+}
+
+/* --- Layout Principal --- */
 .selectionContainer {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
     margin-bottom: 2rem;
 }
 
-.column h2 {
-    border-bottom: 2px solid var(--dourado);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+.column {
+    background-color: var(--preto-card);
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-top: 3px solid var(--dourado);
 }
 
-.item, .datePicker {
-    padding: 1rem;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
+.column h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--dourado);
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--cinza-borda);
+    text-transform: uppercase;
+}
+
+.item {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+    background-color: var(--preto-input);
+    border: 1px solid var(--cinza-borda);
+    color: var(--cinza-texto);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
 }
 
 .item:hover {
     border-color: var(--dourado);
-    transform: translateY(-2px);
+    color: var(--branco);
 }
 
 .item.selected {
+    background-color: var(--dourado);
     border-color: var(--dourado);
-    background-color: #fffbeb;
-    font-weight: bold;
+    color: #121212;
+    font-weight: 600;
 }
 
-.datePicker input {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1rem;
+/* --- Container do Calendário --- */
+.datePicker {
+    background-color: var(--preto-card);
     border-radius: 8px;
-    border: 2px solid #ddd;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o calendário */
+}
+
+.datePicker h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--dourado);
+    margin: 0 0 1.5rem 0;
+    text-transform: uppercase;
+}
+
+/* --- Estilização do react-datepicker (TEMA ESCURO) --- */
+.datePickerInput {
+    /* Este estilo não é usado com 'inline', mas é bom ter */
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+/* O container 'inline' do calendário */
+.react-datepicker {
+    font-family: 'Oswald', sans-serif;
+    background-color: var(--preto-card);
+    border: none !important; 
+    color: var(--branco);
+    /* NOVOS ESTILOS AQUI PARA AUMENTAR O TAMANHO GERAL */
+    transform: scale(1.2); /* Aumenta o calendário em 20% */
+    transform-origin: top left; /* Garante que ele aumente a partir do canto superior esquerdo */
+    margin-top: 20px; /* Adiciona um pouco de espaço extra entre o título e o calendário */
+}
+
+/* Header do calendário (Mês e setas) */
+.react-datepicker__header {
+    background-color: #222;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-top: 15px; /* Mais padding em cima */
+    padding-bottom: 10px; /* Mais padding embaixo */
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker__day-name {
+    color: var(--dourado) !important;
+    font-weight: 500 !important;
+    font-size: 1.2rem; /* Aumenta o tamanho da fonte do mês/ano e dos dias da semana */
+}
+
+.react-datepicker__navigation-icon::before {
+    border-color: var(--dourado) !important;
+}
+
+/* Dias (Números) */
+.react-datepicker__day {
+    color: var(--branco);
+    background-color: var(--preto-input);
+    margin: 0.3rem; /* Aumenta o espaçamento entre os dias */
+    border-radius: 4px;
+    font-size: 1.1rem; /* Aumenta o tamanho da fonte dos dias */
+    width: 2.2rem; /* Define uma largura fixa para os dias */
+    height: 2.2rem; /* Define uma altura fixa para os dias */
+    line-height: 2.2rem; /* Centraliza o texto verticalmente */
+}
+.react-datepicker__day:hover {
+    background-color: #444;
+}
+
+/* Dia selecionado ou "hoje" */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: var(--dourado) !important;
+    color: #121212 !important;
+    font-weight: 600;
+}
+.react-datepicker__day--today {
+    background-color: #555;
+    font-weight: 600;
+}
+
+/* Dias desabilitados */
+.react-datepicker__day--disabled {
+    color: #555 !important;
+    background-color: #2a2a2a !important;
+    opacity: 0.7;
+}
+
+/* --- Container dos Horários (Slots) --- */
+.slotsContainer {
+    background-color: var(--preto-card);
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .slotsContainer h2 {
-    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--dourado);
+    margin: 0 0 1.5rem 0;
+    text-transform: uppercase;
 }
 
 .slotsGrid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.8rem;
 }
 
 .slotButton {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--dourado);
-    background-color: white;
-    border: 2px solid var(--dourado);
-    border-radius: 50px;
+    background-color: var(--preto-input);
+    border: 1px solid var(--cinza-borda);
+    color: var(--cinza-texto);
+    padding: 0.8rem;
+    border-radius: 5px;
     cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
     transition: all 0.2s;
 }
 
 .slotButton:hover {
-    background-color: var(--dourado);
-    color: white;
+    border-color: var(--dourado);
+    color: var(--branco);
 }
 
 .loadingText {
+    color: var(--cinza-texto);
+    font-size: 1.2rem;
     text-align: center;
-    font-style: italic;
-    color: #555;
-}
-
-.datePickerInput {
-    width: 100%;
-    box-sizing: border-box;
+    margin: 2rem;
 }
