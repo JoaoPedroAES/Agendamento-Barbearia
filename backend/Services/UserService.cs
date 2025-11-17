@@ -3,10 +3,6 @@ using barbearia.api.Dtos;
 using barbearia.api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
 
 namespace barbearia.api.Services
 {
@@ -15,42 +11,46 @@ namespace barbearia.api.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _context;
 
+        // Construtor que recebe o UserManager e o DbContext
         public UserService(UserManager<ApplicationUser> userManager, AppDbContext context)
         {
             _userManager = userManager;
             _context = context;
         }
 
+        // Registra um novo cliente no sistema
         public async Task<ApplicationUser> RegisterCustomerAsync(RegisterCustomerDto dto)
         {
+            // Verifica se o e-mail já está em uso
             var existingUser = await _userManager.FindByEmailAsync(dto.Email);
             if (existingUser != null)
             {
                 throw new ArgumentException("Este e-mail já está em uso.");
             }
 
-            // 1. Criar o Usuário
+            // Cria o usuário com os dados fornecidos
             var newUser = new ApplicationUser
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
                 UserName = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                EmailConfirmed = true // Simplificação: já marca como confirmado
+                EmailConfirmed = true // Marca o e-mail como confirmado
             };
 
+            // Tenta criar o usuário no Identity
             var identityResult = await _userManager.CreateAsync(newUser, dto.Password);
             if (!identityResult.Succeeded)
             {
-                // Lança uma exceção com os erros do Identity
+                // Lança exceção com os erros do Identity
                 throw new InvalidOperationException($"Falha ao criar usuário: {string.Join(", ", identityResult.Errors.Select(e => e.Description))}");
             }
 
-            // 2. Adicionar ao Perfil correto
+            // Adiciona o usuário ao papel (Admin ou Cliente)
             var role = dto.CreateAsAdmin ? "Admin" : "Cliente";
             await _userManager.AddToRoleAsync(newUser, role);
 
-            // 3. Criar o Endereço
+            // Cria o endereço do usuário
             var address = new Address
             {
                 ApplicationUserId = newUser.Id,
@@ -63,28 +63,36 @@ namespace barbearia.api.Services
                 State = dto.State
             };
 
+            // Salva o endereço no banco de dados
             _context.Addresses.Add(address);
-            await _context.SaveChangesAsync(); // Salva apenas o endereço aqui
+            await _context.SaveChangesAsync();
 
             return newUser; // Retorna o usuário criado
         }
+
+        // Retorna o perfil completo de um usuário com base no ID
         public async Task<UserProfileDto> GetUserProfileAsync(string userId)
         {
+            // Busca o usuário no banco de dados, incluindo o endereço
             var user = await _context.Users
-                            .Include(u => u.Address) // Inclui o endereço
-                            .AsNoTracking() // Leitura apenas
+                            .Include(u => u.Address)
+                            .AsNoTracking() // Apenas leitura
                             .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) throw new KeyNotFoundException("Usuário não encontrado.");
 
+            // Obtém os papéis do usuário
             var roles = await _userManager.GetRolesAsync(user);
             int? barberId = null;
+
+            // Verifica se o usuário é um barbeiro e obtém o ID do perfil de barbeiro
             if (roles.Contains("Barbeiro"))
             {
                 var barberProfile = await _context.Barbers.AsNoTracking().FirstOrDefaultAsync(b => b.ApplicationUserId == userId);
                 if (barberProfile != null) barberId = barberProfile.Id;
             }
 
+            // Retorna os dados do perfil do usuário
             return new UserProfileDto
             {
                 Id = user.Id,
@@ -105,16 +113,19 @@ namespace barbearia.api.Services
                 }
             };
         }
+
+        // Atualiza o perfil de um usuário com base no ID e nos dados fornecidos
         public async Task<bool> UpdateUserProfileAsync(string userId, UpdateProfileDto dto)
         {
+            // Busca o usuário pelo ID
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false; // Usuário não encontrado
+            if (user == null) return false; // Retorna false se o usuário não for encontrado
 
-            // Atualiza dados do usuário
+            // Atualiza os dados do usuário
             user.FullName = dto.FullName;
             user.PhoneNumber = dto.PhoneNumber;
 
-            // Atualiza dados do endereço (ou cria se não existir)
+            // Atualiza ou cria o endereço do usuário
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.ApplicationUserId == userId);
             if (address == null)
             {
@@ -129,18 +140,21 @@ namespace barbearia.api.Services
             address.City = dto.City;
             address.State = dto.State;
 
-            // Salva
+            // Salva as alterações no banco de dados
             var result = await _userManager.UpdateAsync(user);
-            await _context.SaveChangesAsync(); // Salva endereço
+            await _context.SaveChangesAsync();
 
-            return result.Succeeded;
+            return result.Succeeded; // Retorna true se a atualização foi bem-sucedida
         }
+
+        // Exclui permanentemente a conta de um usuário
         public async Task<IdentityResult?> DeleteUserAccountAsync(string userId)
         {
+            // Busca o usuário pelo ID
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) throw new KeyNotFoundException("Usuário não encontrado.");
 
-            // Remove endereço
+            // Remove o endereço do usuário, se existir
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.ApplicationUserId == userId);
             if (address != null)
             {
@@ -148,7 +162,7 @@ namespace barbearia.api.Services
                 await _context.SaveChangesAsync();
             }
 
-            // Anonimiza dados
+            // Anonimiza os dados do usuário
             user.FullName = "Usuário Removido";
             user.PhoneNumber = null;
             var anonymousEmail = $"deleted_{user.Id}@{Guid.NewGuid()}.com";
@@ -162,7 +176,7 @@ namespace barbearia.api.Services
 
             // Atualiza o usuário no Identity
             var result = await _userManager.UpdateAsync(user);
-            return result; // Retorna o IdentityResult para o controller saber se deu certo
+            return result; // Retorna o resultado da operação
         }
     }
 }
