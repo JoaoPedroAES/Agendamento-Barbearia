@@ -8,41 +8,40 @@ namespace barbearia.api.Services
     {
         private readonly AppDbContext _context;
 
-        // O serviço precisa do DbContext para acessar o banco
+        // Construtor que recebe o DbContext para acessar o banco de dados
         public AvailabilityService(AppDbContext context)
         {
             _context = context;
         }
 
-        // O método que faz o trabalho pesado
+        // Método para obter os horários disponíveis para um barbeiro em uma data específica
         public async Task<List<TimeSpan>> GetAvailableSlotsAsync(int barberId, List<int> serviceIds, DateTime date)
         {
-            // --- TODA A LÓGICA QUE ESTAVA NO CONTROLLER VEM PARA CÁ ---
-
-            // 1. Calcular Duração Total
+            // Calcula a duração total dos serviços selecionados
             int totalDuration = 0;
             var services = await _context.Services
                                    .Where(s => serviceIds.Contains(s.Id))
                                    .ToListAsync();
+
+            // Verifica se todos os IDs de serviço são válidos
             if (services.Count != serviceIds.Count)
             {
-                // Lançar uma exceção ou retornar lista vazia se algum serviço não for encontrado
                 throw new ArgumentException("Um ou mais IDs de serviço são inválidos.");
             }
             totalDuration = services.Sum(s => s.DurationInMinutes);
 
-
-            // 2. Encontrar Horário de Trabalho
+            // Obtém o horário de trabalho do barbeiro para o dia da semana
             var dayOfWeek = date.DayOfWeek;
             var workSchedule = await _context.WorkSchedules
                 .FirstOrDefaultAsync(s => s.BarberId == barberId && s.DayOfWeek == dayOfWeek);
 
+            // Retorna uma lista vazia se o barbeiro não trabalha nesse dia
             if (workSchedule == null)
             {
-                return new List<TimeSpan>(); // Barbeiro não trabalha
+                return new List<TimeSpan>();
             }
 
-            // 3. Buscar Agendamentos Existentes (com a correção UTC)
+            // Busca os agendamentos existentes do barbeiro para a data especificada
             var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
             var endDate = startDate.AddDays(1);
             var existingAppointments = await _context.Appointments
@@ -52,34 +51,39 @@ namespace barbearia.api.Services
                             a.Status == AppointmentStatus.Scheduled)
                 .ToListAsync();
 
-            // 4. Gerar Slots Disponíveis (a mesma lógica de antes)
+            // Gera os horários disponíveis com base no horário de trabalho e nos agendamentos existentes
             var availableSlots = new List<TimeSpan>();
-            var slotInterval = TimeSpan.FromMinutes(15);
+            var slotInterval = TimeSpan.FromMinutes(15); // Intervalo entre os horários disponíveis
             var currentSlot = workSchedule.StartTime;
 
             while (currentSlot < workSchedule.EndTime)
             {
                 var slotEndTime = currentSlot.Add(TimeSpan.FromMinutes(totalDuration));
 
+                // Verifica se o horário extrapola o horário de trabalho
                 if (slotEndTime > workSchedule.EndTime) break;
 
+                // Verifica se o horário está dentro do intervalo de pausa
                 bool inBreak = (currentSlot < workSchedule.BreakEndTime &&
                                 slotEndTime > workSchedule.BreakStartTime);
 
+                // Verifica se o horário conflita com algum agendamento existente
                 bool overlapsExisting = existingAppointments.Any(a =>
                     currentSlot < a.EndDateTime.TimeOfDay &&
                     slotEndTime > a.StartDateTime.TimeOfDay
                 );
 
+                // Adiciona o horário à lista se não estiver em pausa e não houver conflito
                 if (!inBreak && !overlapsExisting)
                 {
                     availableSlots.Add(currentSlot);
                 }
 
+                // Avança para o próximo horário
                 currentSlot = currentSlot.Add(slotInterval);
             }
 
-            return availableSlots;
+            return availableSlots; // Retorna a lista de horários disponíveis
         }
     }
 }

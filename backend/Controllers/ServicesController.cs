@@ -1,12 +1,9 @@
 ﻿using barbearia.api.Data;
 using barbearia.api.Models;
 using barbearia.api.Services;
-using barbearia.api.Dtos; // <-- 1. IMPORTE OS DTOs
+using barbearia.api.Dtos;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
 
 namespace barbearia.api.Controllers
 {
@@ -16,77 +13,81 @@ namespace barbearia.api.Controllers
     {
         private readonly IServicesService _servicesService;
 
+        // Construtor que injeta o serviço de gerenciamento de serviços
         public ServicesController(IServicesService servicesService)
         {
             _servicesService = servicesService;
         }
 
+        // Endpoint para listar todos os serviços cadastrados
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Service>>> GetServices()
         {
-            // Corrigido para o nome do método na interface
             var services = await _servicesService.GetAllServicesAsync();
-            return Ok(services);
+            return Ok(services); // Retorna 200 com a lista de serviços
         }
 
+        // Endpoint para obter os dados de um serviço específico pelo ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Service>> GetService(int id)
         {
             var service = await _servicesService.GetServiceByIdAsync(id);
             if (service == null)
             {
-                return NotFound(); // 404
+                return NotFound(); // Retorna 404 se o serviço não for encontrado
             }
-            return Ok(service);
+            return Ok(service); // Retorna 200 com os dados do serviço
         }
 
+        // Endpoint para criar um novo serviço (somente Admin ou Barbeiro)
         [HttpPost]
         [Authorize(Roles = "Admin,Barbeiro")]
-        // 2. ALTERADO para CreateServiceDto
         public async Task<ActionResult<Service>> CreateService(CreateServiceDto dto)
         {
+            // Valida o modelo recebido
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState); // Retorna 400 se o modelo for inválido
             }
 
-            // 3. ALTERADO para passar o DTO
+            // Chama o serviço para criar o novo serviço
             var createdService = await _servicesService.CreateServiceAsync(dto);
+            // Retorna 201 Created com o serviço criado
             return CreatedAtAction(nameof(GetService), new { id = createdService.Id }, createdService);
         }
 
+        // Endpoint para atualizar os dados de um serviço existente (somente Admin ou Barbeiro)
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Barbeiro")]
-        // 4. ALTERADO para UpdateServiceDto
         public async Task<IActionResult> UpdateService(int id, UpdateServiceDto dto)
         {
-            // 5. REMOVIDO o "if (id != serviceInput.Id)" (DTO não tem ID)
-
+            // Valida o modelo recebido
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState); // Retorna 400 se o modelo for inválido
             }
 
-            // 6. ALTERADO para passar o DTO
+            // Chama o serviço para atualizar o serviço
             var updatedService = await _servicesService.UpdateServiceAsync(id, dto);
             if (updatedService == null)
             {
-                return NotFound(); // 404 se o serviço não existir
+                return NotFound(); // Retorna 404 se o serviço não for encontrado
             }
-            return NoContent(); // 204 Sucesso
+            return NoContent(); // Retorna 204 para sucesso
         }
 
+        // Endpoint para excluir um serviço pelo ID (somente Admin ou Barbeiro)
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,Barbeiro")]
         public async Task<IActionResult> DeleteService(int id)
         {
+            // Chama o serviço para excluir o serviço
             var success = await _servicesService.DeleteServiceAsync(id);
             if (!success)
             {
-                return NotFound(); // 404 se não encontrado
+                return NotFound(); // Retorna 404 se o serviço não for encontrado
             }
-            return NoContent(); // 204 Sucesso
+            return NoContent(); // Retorna 204 para sucesso
         }
-
     }
 }

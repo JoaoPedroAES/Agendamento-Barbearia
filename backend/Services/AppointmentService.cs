@@ -8,44 +8,46 @@ namespace barbearia.api.Services
     public class AppointmentService : IAppointmentService
     {
         private readonly AppDbContext _context;
-        // Injetamos o IAvailabilityService para revalidar o slot
         private readonly IAvailabilityService _availabilityService;
-        private readonly IEmailService _emailService; // <-- OK!
+        private readonly IEmailService _emailService;
 
-        // --- 1ª MUDANÇA: Adicionar IEmailService ao construtor ---
         public AppointmentService(AppDbContext context, IAvailabilityService availabilityService, IEmailService emailService)
         {
             _context = context;
             _availabilityService = availabilityService;
-            _emailService = emailService; // <-- 2ª MUDANÇA: Atribuir o serviço
+            _emailService = emailService;
         }
 
         public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, string customerId)
         {
-            // 1. Buscar os serviços e calcular total/duração
+            // Busca os serviços selecionados no banco de dados
             var services = await _context.Services
                                         .Where(s => dto.ServiceIds.Contains(s.Id))
                                         .ToListAsync();
+
+            // Verifica se todos os IDs de serviço são válidos
             if (services.Count != dto.ServiceIds.Count)
             {
                 throw new ArgumentException("Um ou mais IDs de serviço são inválidos.");
             }
+
+            // Calcula o preço total e a duração total dos serviços
             decimal totalPrice = services.Sum(s => s.Price);
             int totalDuration = services.Sum(s => s.DurationInMinutes);
 
-            // --- REVALIDAÇÃO DO SLOT ---
-            // 2. Chama o AvailabilityService para verificar se o slot AINDA está livre
+            // Define o horário de início como UTC
             var startDateTimeUtc = DateTime.SpecifyKind(dto.StartDateTime, DateTimeKind.Utc);
+
+            // Obtém os horários disponíveis para o barbeiro e os serviços
             var availableSlots = await _availabilityService.GetAvailableSlotsAsync(dto.BarberId, dto.ServiceIds, startDateTimeUtc.Date);
 
-            // Verifica se o horário exato ainda está na lista de disponíveis
+            // Verifica se o horário selecionado ainda está disponível
             if (!availableSlots.Contains(startDateTimeUtc.TimeOfDay))
             {
                 throw new InvalidOperationException("O horário selecionado não está mais disponível.");
             }
-            // --- FIM DA REVALIDAÇÃO ---
 
-            // 3. Criar e Salvar o Agendamento
+            // Cria o objeto de agendamento
             var appointment = new Appointment
             {
                 CustomerId = customerId,
@@ -54,25 +56,22 @@ namespace barbearia.api.Services
                 EndDateTime = startDateTimeUtc.AddMinutes(totalDuration),
                 Status = AppointmentStatus.Scheduled,
                 TotalPrice = totalPrice,
-                Services = services // <-- Importante: os serviços já estão aqui
+                Services = services // Serviços associados ao agendamento
             };
 
+            // Salva o agendamento no banco de dados
             _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync(); // <-- Agendamento salvo no banco!
+            await _context.SaveChangesAsync();
 
-            // --- 3ª MUDANÇA: Disparar o e-mail de notificação ---
-            // Colocamos em um try/catch para que, se o e-mail falhar,
-            // o agendamento não seja desfeito (o cliente conseguiu agendar).
+            // Tenta enviar o e-mail de confirmação
             try
             {
-                // Buscar os dados necessários para o e-mail
                 var cliente = await _context.Users.FindAsync(customerId);
-
                 var barbeiro = await _context.Barbers
-                    .Include(b => b.UserAccount) // Inclui o usuário para pegar o e-mail
+                    .Include(b => b.UserAccount) // Inclui os dados do barbeiro
                     .FirstOrDefaultAsync(b => b.Id == dto.BarberId);
 
-                // Verificamos se temos todos os dados para o e-mail
+                // Verifica se os dados necessários para o e-mail estão completos
                 if (cliente != null && barbeiro != null && appointment.Services.Any())
                 {
                     await _emailService.EnviarEmailConfirmacaoAgendamento(appointment, cliente, barbeiro);
@@ -84,8 +83,7 @@ namespace barbearia.api.Services
             }
             catch (Exception ex)
             {
-                // Logar o erro (ex: "Falha ao enviar e-mail de confirmação"), 
-                // mas NÃO retorne o erro para o cliente, pois o agendamento JÁ FOI FEITO.
+                // Loga o erro, mas não cancela o agendamento
                 Console.WriteLine($"Erro ao disparar e-mail de agendamento: {ex.Message}");
             }
 
@@ -94,10 +92,11 @@ namespace barbearia.api.Services
 
         public async Task<IEnumerable<Appointment>> GetMyAppointmentsAsync(string customerId)
         {
+            // Retorna os agendamentos do cliente, incluindo barbeiro e serviços
             return await _context.Appointments
                 .Where(a => a.CustomerId == customerId)
                 .Include(a => a.Barber)
-                    .ThenInclude(b => b.UserAccount) // Inclui dados do barbeiro
+                    .ThenInclude(b => b.UserAccount) // Inclui os dados do barbeiro
                 .Include(a => a.Services)
                 .OrderByDescending(a => a.StartDateTime)
                 .ToListAsync();
@@ -105,38 +104,38 @@ namespace barbearia.api.Services
 
         public async Task<bool> CancelAppointmentAsync(int appointmentId, string customerId)
         {
-            // 1. Busca o agendamento E os dados necessários para o e-mail
+            // Busca o agendamento e os dados necessários para o e-mail
             var appointment = await _context.Appointments
-                .Include(a => a.Customer)      // <-- Inclui o Cliente
-                .Include(a => a.Barber)        // <-- Inclui o Barbeiro
-                    .ThenInclude(b => b.UserAccount) // <-- Inclui a conta do Barbeiro
-                .Include(a => a.Services)      // <-- Inclui os Serviços
-                .FirstOrDefaultAsync(a => a.Id == appointmentId); // Busca pelo ID
+                .Include(a => a.Customer)      // Inclui os dados do cliente
+                .Include(a => a.Barber)        // Inclui os dados do barbeiro
+                    .ThenInclude(b => b.UserAccount) // Inclui a conta do barbeiro
+                .Include(a => a.Services)      // Inclui os serviços do agendamento
+                .FirstOrDefaultAsync(a => a.Id == appointmentId);
 
+            // Verifica se o agendamento existe e pertence ao cliente
             if (appointment == null || appointment.CustomerId != customerId)
             {
                 return false; // Não encontrado ou não pertence ao cliente
             }
 
-            // 2. Verifica se já está cancelado (para não enviar e-mail de novo)
+            // Verifica se o agendamento já foi cancelado
             if (appointment.Status == AppointmentStatus.CancelledByCustomer)
             {
                 return true; // Já estava cancelado
             }
 
-            // 3. Altera o status
+            // Altera o status para cancelado
             appointment.Status = AppointmentStatus.CancelledByCustomer;
-            await _context.SaveChangesAsync(); // Salva a mudança no banco
+            await _context.SaveChangesAsync(); // Salva a alteração no banco
 
-            // 4. Dispara o e-mail de cancelamento (Fire-and-Forget)
+            // Tenta enviar o e-mail de cancelamento
             try
             {
-                // Os dados já foram carregados (Cliente e Barbeiro)
                 await _emailService.EnviarEmailCancelamento(appointment, appointment.Customer, appointment.Barber);
             }
             catch (Exception ex)
             {
-                // Loga o erro, mas não falha a operação, pois o cancelamento já ocorreu.
+                // Loga o erro, mas não falha a operação
                 Console.WriteLine($"Erro ao disparar e-mail de cancelamento: {ex.Message}");
             }
 
@@ -145,10 +144,12 @@ namespace barbearia.api.Services
 
         public async Task<IEnumerable<Appointment>> GetAgendaAsync(DateTime date, string userId, bool isBarber)
         {
+            // Define o intervalo de data para a agenda
             var startDate = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
             var endDate = startDate.AddDays(1);
             var query = _context.Appointments.AsQueryable();
 
+            // Filtra os agendamentos se o usuário for barbeiro
             if (isBarber)
             {
                 var barberProfile = await _context.Barbers.FirstOrDefaultAsync(b => b.ApplicationUserId == userId);
@@ -162,6 +163,7 @@ namespace barbearia.api.Services
                 }
             }
 
+            // Retorna os agendamentos no intervalo de data, incluindo cliente e serviços
             return await query
                 .Where(a => a.StartDateTime >= startDate && a.StartDateTime < endDate)
                 .Include(a => a.Customer)
