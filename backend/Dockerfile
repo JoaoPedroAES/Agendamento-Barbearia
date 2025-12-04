@@ -1,5 +1,5 @@
 # Estágio 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copia todos os arquivos da pasta backend para o container
@@ -13,7 +13,7 @@ RUN dotnet restore "barbearia.api.csproj"
 RUN dotnet publish "barbearia.api.csproj" -c Release -o /app/publish
 
 # Estágio 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
