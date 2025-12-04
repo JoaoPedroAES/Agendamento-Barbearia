@@ -15,6 +15,7 @@
  import ListarBarbeiros from './pages/ListarBarbeiros';
  import TermosDeUso from './pages/TermosDeUso';
  import TermosBarbeiro from './pages/TermosBarbeiro';
+ import EsqueceuSenha from './pages/EsqueceuSenha';
 
  function AppRoutes(){
      return (
@@ -25,6 +26,7 @@
              <Route path="/login" element={<Login/>}></Route>
              <Route path="/registrar" element={<Cadastro/>}></Route>
              <Route path="/termos-de-uso" element={<TermosDeUso />}></Route>
+             <Route path="/esqueceu-senha" element={<EsqueceuSenha />}></Route>
 
              {}
              <Route 

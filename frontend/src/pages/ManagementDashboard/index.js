@@ -140,8 +140,6 @@ function ManagementDashboard() {
         navigate('/login');
     };
 
-    // 'handleDeleteAccount' foi removida
-
     
     const handleDayToggle = (dayIndex) => {
         setSchedule(prev => ({

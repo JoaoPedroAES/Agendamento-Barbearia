@@ -97,7 +97,7 @@ function EditarBarbeiro() {
                     <h1>Editar Perfil</h1>
                     
                     <div className={styles.inputGroup}>
-                        <label>Nome Completo</label>
+                        <label>Nome e Sobrenome</label>
                         <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
                     </div>
                     
@@ -119,7 +119,7 @@ function EditarBarbeiro() {
                     </div>
                     
                     <div className={styles.inputGroup}>
-                        <label>Celular / WhatsApp</label>
+                        <label>Celular</label>
                         <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
                     </div>
 

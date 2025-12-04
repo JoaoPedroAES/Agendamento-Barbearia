@@ -21,5 +21,6 @@ namespace barbearia.api.Services
 
         // Desativa um barbeiro, tornando-o indisponível para agendamentos
         Task<bool> DeactivateBarberAsync(int barberId);
+
     }
 }
