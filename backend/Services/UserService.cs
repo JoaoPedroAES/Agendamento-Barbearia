@@ -147,14 +147,30 @@ namespace barbearia.api.Services
             return result.Succeeded; // Retorna true se a atualização foi bem-sucedida
         }
 
-        // Exclui permanentemente a conta de um usuário
+        // --- ATENÇÃO: MÉTODO ATUALIZADO PARA LIBERAR HORÁRIOS ---
         public async Task<IdentityResult?> DeleteUserAccountAsync(string userId)
         {
-            // Busca o usuário pelo ID
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) throw new KeyNotFoundException("Usuário não encontrado.");
 
-            // Remove o endereço do usuário, se existir
+            // --- CORREÇÃO: Simplificamos a busca ---
+            // Buscamos QUALQUER agendamento que esteja como 'Scheduled' (Agendado)
+            // Removemos a verificação de data para evitar problemas de Fuso Horário
+            var activeAppointments = await _context.Appointments
+                .Where(a => a.CustomerId == userId &&
+                            a.Status == AppointmentStatus.Scheduled)
+                .ToListAsync();
+
+            // Cancela todos eles
+            foreach (var appointment in activeAppointments)
+            {
+                appointment.Status = AppointmentStatus.CancelledByCustomer;
+            }
+
+            // Salva o cancelamento
+            await _context.SaveChangesAsync();
+
+            // --- Restante do código de anonimização (igual ao anterior) ---
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.ApplicationUserId == userId);
             if (address != null)
             {
@@ -162,7 +178,6 @@ namespace barbearia.api.Services
                 await _context.SaveChangesAsync();
             }
 
-            // Anonimiza os dados do usuário
             user.FullName = "Usuário Removido";
             user.PhoneNumber = null;
             var anonymousEmail = $"deleted_{user.Id}@{Guid.NewGuid()}.com";
@@ -174,9 +189,7 @@ namespace barbearia.api.Services
             user.LockoutEnd = DateTime.UtcNow.AddYears(100);
             user.EmailConfirmed = false;
 
-            // Atualiza o usuário no Identity
-            var result = await _userManager.UpdateAsync(user);
-            return result; // Retorna o resultado da operação
+            return await _userManager.UpdateAsync(user);
         }
     }
 }
