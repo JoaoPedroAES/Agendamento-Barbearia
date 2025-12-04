@@ -9,24 +9,28 @@ namespace barbearia.api.Services
     {
         private readonly AppDbContext _context;
 
+        // Construtor que recebe o contexto do banco de dados
         public ServicesService(AppDbContext context)
         {
             _context = context;
         }
 
+        // Retorna todos os serviços cadastrados no banco de dados
         public async Task<IEnumerable<Service>> GetAllServicesAsync()
         {
-            return await _context.Services.AsNoTracking().ToListAsync(); // AsNoTracking para consultas de leitura
+            return await _context.Services.AsNoTracking().ToListAsync(); // AsNoTracking para melhorar a performance em consultas de leitura
         }
 
+        // Retorna um serviço específico com base no ID fornecido
         public async Task<Service?> GetServiceByIdAsync(int id)
         {
             return await _context.Services.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
         }
 
+        // Cria um novo serviço com base nos dados fornecidos no DTO
         public async Task<Service> CreateServiceAsync(CreateServiceDto dto)
         {
-            // Mapeia do DTO para o Modelo
+            // Mapeia os dados do DTO para o modelo de serviço
             var service = new Service
             {
                 Name = dto.Name,
@@ -35,40 +39,47 @@ namespace barbearia.api.Services
                 DurationInMinutes = dto.DurationInMinutes
             };
 
+            // Adiciona o novo serviço ao banco de dados
             _context.Services.Add(service);
-            await _context.SaveChangesAsync();
-            return service; // Retorna o novo serviço criado
+            await _context.SaveChangesAsync(); // Salva as alterações no banco
+            return service; // Retorna o serviço criado
         }
 
+        // Atualiza os dados de um serviço existente com base no ID e no DTO fornecido
         public async Task<Service> UpdateServiceAsync(int id, UpdateServiceDto dto)
         {
+            // Busca o serviço pelo ID
             var service = await _context.Services.FindAsync(id);
             if (service == null)
             {
-                return null; // Retorna nulo se não encontrar
+                return null; // Retorna nulo se o serviço não for encontrado
             }
 
-            // Mapeia os dados do DTO para o modelo existente
+            // Atualiza os dados do serviço com base no DTO
             service.Name = dto.Name;
             service.Description = dto.Description;
             service.Price = dto.Price;
             service.DurationInMinutes = dto.DurationInMinutes;
 
+            // Salva as alterações no banco de dados
             await _context.SaveChangesAsync();
             return service;
         }
 
+        // Exclui um serviço com base no ID fornecido
         public async Task<bool> DeleteServiceAsync(int id)
         {
+            // Busca o serviço pelo ID
             var service = await _context.Services.FindAsync(id);
             if (service == null)
             {
-                return false; // Não encontrado
+                return false; // Retorna false se o serviço não for encontrado
             }
 
+            // Remove o serviço do banco de dados
             _context.Services.Remove(service);
-            await _context.SaveChangesAsync();
-            return true; // Sucesso
+            await _context.SaveChangesAsync(); // Salva as alterações no banco
+            return true; // Retorna true se a exclusão for bem-sucedida
         }
     }
 }

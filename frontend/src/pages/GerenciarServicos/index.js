@@ -8,12 +8,10 @@ import { FaPen, FaTrash, FaArrowLeft } from 'react-icons/fa';
 function GerenciarServicos() {
     const navigate = useNavigate();
     
-
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    
     const [isEditing, setIsEditing] = useState(null); 
     const [formData, setFormData] = useState({
         name: '',
@@ -22,7 +20,6 @@ function GerenciarServicos() {
         description: '' 
     });
 
-    
     const fetchServices = async () => {
         try {
             setLoading(true);
@@ -41,19 +38,16 @@ function GerenciarServicos() {
         fetchServices();
     }, []);
 
-    
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    
     const handleCancel = () => {
         setIsEditing(null);
         setFormData({ name: '', price: '', durationInMinutes: '', description: '' }); 
     };
 
-    
     const handleEditClick = (service) => {
         window.scrollTo(0, 0); 
         const serviceId = service.id || service._id; 
@@ -69,7 +63,6 @@ function GerenciarServicos() {
         });
     };
 
-    
     const handleDelete = async (id) => {
         if (window.confirm("Tem certeza que deseja excluir este serviço?")) {
             try {
@@ -83,22 +76,34 @@ function GerenciarServicos() {
         }
     };
 
-    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
-        
+        // --- 1. VALIDAÇÃO DE NOME ---
+        // Permite apenas letras (com acentos) e espaços.
+        const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
+
+        if (!nameRegex.test(formData.name)) {
+            setError("O nome do serviço não pode conter números ou caracteres especiais.");
+            return; 
+        }
+
+        // --- 2. PREPARAÇÃO DOS DADOS ---
+        // Criamos o objeto básico sem o ID
         const dataPayload = {
-            id: isEditing ? parseInt(isEditing, 10) : 0, 
             name: formData.name,
             description: formData.description, 
             price: parseFloat(String(formData.price).replace(',', '.')),
             durationInMinutes: parseInt(formData.durationInMinutes, 10)
-            
         };
 
-        
+        // Só adicionamos o ID se estivermos em modo de edição
+        if (isEditing) {
+            dataPayload.id = parseInt(isEditing, 10);
+        }
+
+        // --- 3. VALIDAÇÕES NUMÉRICAS ---
         if (isNaN(dataPayload.price) || dataPayload.price <= 0) {
              setError("O preço deve ser um número maior que zero.");
              return;
@@ -110,14 +115,12 @@ function GerenciarServicos() {
 
         console.log("Enviando para a API:", dataPayload); 
 
-        
+        // --- 4. ENVIO PARA API ---
         try {
             if (isEditing) {
-                
                 await api.put(`/api/Services/${isEditing}`, dataPayload);
                 alert("Serviço atualizado com sucesso!");
             } else {
-                
                 await api.post('/api/Services', dataPayload);
                 alert("Serviço cadastrado com sucesso!");
             }
@@ -125,8 +128,32 @@ function GerenciarServicos() {
             fetchServices(); 
         } catch (err) {
             console.error("Erro ao salvar:", err);
-            const apiError = err.response?.data?.title || err.response?.data || "Erro ao salvar o serviço. Verifique os campos.";
-            setError(apiError);
+            
+            // Lógica avançada para ler o erro do backend
+            let errorMessage = "Erro ao salvar o serviço. Verifique os campos.";
+
+            if (err.response && err.response.data) {
+                // Caso 1: O backend devolve apenas uma string
+                if (typeof err.response.data === 'string') {
+                    errorMessage = err.response.data;
+                } 
+                // Caso 2: O backend devolve uma lista de erros (validation problems)
+                else if (err.response.data.errors) {
+                    const errorValues = Object.values(err.response.data.errors);
+                    // Pega a primeira mensagem de erro disponível
+                    if (errorValues.length > 0 && Array.isArray(errorValues[0])) {
+                        errorMessage = errorValues[0][0]; 
+                    } else if (errorValues.length > 0) {
+                        errorMessage = errorValues[0];
+                    }
+                }
+                // Caso 3: O backend devolve um objeto com 'title' ou 'message'
+                else if (err.response.data.title) {
+                    errorMessage = err.response.data.title;
+                }
+            }
+            
+            setError(errorMessage);
         }
     };
 
@@ -137,11 +164,11 @@ function GerenciarServicos() {
                     <FaArrowLeft /> Voltar
                 </button>
                 <h1>Gerenciar Serviços</h1>
-                <div style={{width: '100px'}}></div> {}
+                <div style={{width: '100px'}}></div> 
             </header>
 
             <main className={styles.mainGrid}>
-                {}
+                
                 <section className={styles.formSection}>
                     <div className={styles.formContainer}>
                         <h2>{isEditing ? 'Editar Serviço' : 'Adicionar Novo Serviço'}</h2>
@@ -151,7 +178,6 @@ function GerenciarServicos() {
                                 <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                             </div>
 
-                            {}
                             <div className={styles.inputGroup}>
                                 <label htmlFor="description">Descrição (Opcional)</label>
                                 <textarea 
@@ -190,7 +216,6 @@ function GerenciarServicos() {
                     </div>
                 </section>
 
-                {}
                 <section className={styles.listSection}>
                     <h2>Serviços Cadastrados</h2>
                     {loading && <p style={{color: '#ccc'}}>Carregando...</p>}
@@ -207,7 +232,7 @@ function GerenciarServicos() {
                                         <h3>{service.name}</h3>
                                         <p>Preço: R$ {Number(service.price).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                         <p>Duração: {service.durationInMinutes} min</p>
-                                        {}
+                                        
                                         {service.description && <p style={{color: '#aaa', fontSize: '0.9rem'}}><em>{service.description}</em></p>}
                                     </div>
                                     <div className={styles.serviceActions}>

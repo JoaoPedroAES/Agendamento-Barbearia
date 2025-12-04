@@ -6,6 +6,7 @@ using barbearia.api.Data;
 using barbearia.api.Models;
 using barbearia.api.Services;
 using barbearia.api.Dtos;
+using System.Collections.Generic; // <-- Adicionado para o Teste 6
 
 namespace barbearia.api.tests
 {
@@ -145,6 +146,59 @@ namespace barbearia.api.tests
 
             // 3. Assert
             Assert.False(resultado);
+        }
+
+        // --- ▼▼▼ NOVOS TESTES ADICIONADOS ABAIXO ▼▼▼ ---
+
+        // --- TESTE 6: GetAllServicesAsync (Caminho Feliz) ---
+        [Fact]
+        public async Task GetAllServicesAsync_DeveRetornarTodosOsServicos()
+        {
+            // 1. Arrange
+            // Adiciona dois serviços ao banco
+            _context.Services.AddRange(
+                new Service { Name = "Corte", Description = "Desc1", Price = 30, DurationInMinutes = 30 },
+                new Service { Name = "Barba", Description = "Desc2", Price = 20, DurationInMinutes = 20 }
+            );
+            await _context.SaveChangesAsync();
+
+            // 2. Act
+            var resultado = await _service.GetAllServicesAsync();
+
+            // 3. Assert
+            Assert.NotNull(resultado);
+            Assert.Equal(2, resultado.Count()); // Verifica se retornou 2 serviços
+            Assert.Contains(resultado, s => s.Name == "Corte");
+        }
+
+        // --- TESTE 7: GetServiceByIdAsync (Caminho Feliz) ---
+        [Fact]
+        public async Task GetServiceByIdAsync_DeveRetornarServicoCorreto_QuandoEncontrado()
+        {
+            // 1. Arrange
+            await SeedDatabaseAsync(); // Cria o serviço com Id 1 (Name = "Corte Padrão")
+            
+            // 2. Act
+            var resultado = await _service.GetServiceByIdAsync(1);
+
+            // 3. Assert
+            Assert.NotNull(resultado);
+            Assert.Equal(1, resultado.Id);
+            Assert.Equal("Corte Padrão", resultado.Name);
+        }
+
+        // --- TESTE 8: GetServiceByIdAsync (Caso de Falha) ---
+        [Fact]
+        public async Task GetServiceByIdAsync_DeveRetornarNull_QuandoNaoEncontrado()
+        {
+            // 1. Arrange
+            // Banco está vazio
+
+            // 2. Act
+            var resultado = await _service.GetServiceByIdAsync(99); // ID 99 não existe
+
+            // 3. Assert
+            Assert.Null(resultado);
         }
     }
 }

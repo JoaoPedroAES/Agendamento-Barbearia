@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './TermosBarbeiro.module.css'; 
-import { useAuth } from '../../context/AuthContext'; // Importa o AuthContext
+import { useAuth } from '../../context/AuthContext'; 
 
 function TermosBarbeiro() {
     const navigate = useNavigate();
-    // A função 'updateUserTerms' não é mais necessária aqui, 
-    // pois o 'ManagementDashboard' fará a verificação novamente após o aceite.
     const { logout } = useAuth(); 
     
     const [accepted, setAccepted] = useState(false);
@@ -25,11 +23,10 @@ function TermosBarbeiro() {
         setError(null);
         
         try {
-            // 1. Chama a API que criamos no backend para salvar o aceite
+            // 1. Salva o aceite no backend
             await api.post('/api/barber/accept-terms');
             
-            // 2. Redireciona para o painel de gestão
-            // O 'useEffect' lá vai rodar de novo, verá 'true' e deixará o usuário entrar.
+            // 2. Redireciona para o painel
             navigate('/gestao');
 
         } catch (err) {
@@ -39,7 +36,6 @@ function TermosBarbeiro() {
         }
     };
 
-    // Função de Logout (caso o barbeiro não queira aceitar e queira sair)
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -48,8 +44,7 @@ function TermosBarbeiro() {
     return (
         <div className={styles.page}>
             <header className={styles.header}>
-                <h1>Termos de Uso e Responsabilidade (Profissional)</h1>
-                {/* O botão 'Voltar' é substituído por 'Sair' neste fluxo obrigatório */}
+                <h1>Termos de Uso (Profissional)</h1>
                 <button onClick={handleLogout} className={styles.logoutButton}>
                     Sair
                 </button>
@@ -57,45 +52,39 @@ function TermosBarbeiro() {
 
             <main className={styles.content}>
                 
-                <p className={styles.intro}>Bem-vindo à equipe! Seu acesso ao Painel de Gestão está quase liberado. Antes de continuar, por favor, leia e aceite os termos de uso profissional e a política de tratamento de dados.</p>
+                <p className={styles.intro}>Bem-vindo à equipe! Seu acesso ao Painel de Gestão está quase liberado. Para garantir um ambiente seguro e profissional, precisamos que você leia e concorde com as regras abaixo.</p>
 
-                <h2>1. Objeto</h2>
-                <p>Estes Termos regem o uso do Painel de Gestão ("Plataforma") por você ("Barbeiro"), estabelecendo suas obrigações, responsabilidades e as diretrizes de tratamento de dados de clientes, em conformidade com a Lei Geral de Proteção de Dados (LGPD).</p>
+                <h2>1. O seu papel no Sistema</h2>
+                <p>O Painel de Gestão é sua ferramenta de trabalho. Ao utilizá-lo, você concorda em seguir as diretrizes de funcionamento da barbearia e respeitar as leis de proteção de dados.</p>
 
-                <h2>2. Responsabilidades do Barbeiro</h2>
-                <p>Ao aceitar estes termos, você se compromete a:</p>
+                <h2>2. Suas Responsabilidades</h2>
+                <p>Para que a agenda funcione perfeitamente, você se compromete a:</p>
                 <ul>
-                    <li>**Profissionalismo:** Prestar os serviços agendados com pontualidade, qualidade e profissionalismo.</li>
-                    <li>**Gestão de Agenda:** Manter seus horários de trabalho (`WorkSchedule`) e pausas rigorosamente atualizados na Plataforma. A disponibilidade de horários para os clientes depende exclusivamente desta configuração.</li>
-                    <li>**Uso da Plataforma:** Utilizar o painel de gestão apenas para fins profissionais relacionados à barbearia, não compartilhando seu acesso (`login` e `senha`) com terceiros.</li>
+                    <li><strong>Ser Profissional:</strong> Atender os clientes com pontualidade e qualidade.</li>
+                    <li><strong>Cuidar da Agenda:</strong> Manter seus horários de trabalho e pausas sempre atualizados no sistema. Lembre-se: o cliente só consegue agendar se a sua agenda estiver configurada corretamente.</li>
+                    <li><strong>Segurança:</strong> Sua senha é pessoal e intransferível. Nunca compartilhe seu login com outras pessoas.</li>
                 </ul>
 
-                <h2>3. Política de Privacidade e Tratamento de Dados (LGPD)</h2>
-                <p>Como Barbeiro, você terá acesso a Dados Pessoais de Clientes. Você é considerado um **Agente de Tratamento** e deve seguir rigorosamente a LGPD.</p>
+                <h2>3. Dados dos Clientes e LGPD (Muito Importante)</h2>
+                <p>Como barbeiro, você verá informações dos clientes (Nome, Serviço e Horário). Pela lei (LGPD), você é responsável por manter o sigilo desses dados.</p>
 
-                <h3>3.1. Dados Acessíveis</h3>
-                <p>Você terá acesso aos seguintes dados dos clientes que agendarem com você:</p>
+                <h3>3.1. O que você NÃO pode fazer:</h3>
                 <ul>
-                    <li>Nome Completo do Cliente.</li>
-                    <li>Serviços selecionados.</li>
-                    <li>Data e Hora do agendamento.</li>
+                    <li><strong>Copiar dados:</strong> Não anote telefones ou nomes de clientes em agendas de papel ou no seu WhatsApp pessoal sem autorização.</li>
+                    <li><strong>Usar para outros fins:</strong> Não use os dados para mandar propagandas ou contatar o cliente por motivos pessoais.</li>
+                    <li><strong>Compartilhar:</strong> Nunca envie prints ou dados de clientes para terceiros.</li>
                 </ul>
-                <p>Você **não** terá acesso à senha, endereço ou dados de pagamento dos clientes.</p>
+                <p><strong>Atenção:</strong> O vazamento de dados de clientes é uma infração grave e pode resultar no desligamento imediato da plataforma e em processos legais.</p>
 
-                <h3>3.2. Finalidade e Confidencialidade (Obrigatório)</h3>
-                <p>Você se compromete a utilizar os dados dos clientes **única e exclusivamente** para a finalidade de prestar o serviço agendado. É estritamente proibido:</p>
+                <h2>4. Gestão de Serviços</h2>
+                <p>Ao cadastrar ou editar serviços, você deve garantir que as informações sejam reais:</p>
                 <ul>
-                    <li>Copiar, salvar ou armazenar dados de clientes fora da plataforma (ex: em agendas pessoais, WhatsApp pessoal, etc.).</li>
-                    <li>Utilizar os dados dos clientes para qualquer outra finalidade (ex: marketing pessoal não autorizado, contato por motivos não relacionados ao agendamento).</li>
-                    <li>Compartilhar os dados dos clientes com qualquer terceiro.</li>
+                    <li><strong>Preço:</strong> O valor deve ser o que será cobrado no final.</li>
+                    <li><strong>Duração:</strong> O tempo do serviço deve ser exato. O sistema usa essa informação para calcular os encaixes na sua agenda. Se a duração estiver errada, sua agenda pode ficar bagunçada.</li>
                 </ul>
-                <p>O descumprimento desta cláusula constitui violação grave da LGPD e destes Termos, sujeitando o Barbeiro ao desligamento imediato da plataforma e às sanções legais cabíveis.</p>
-
-                <h2>4. Gestão de Serviços (CRUD)</h2>
-                <p>O Barbeiro (ou Admin) é responsável por manter a lista de serviços (`Gerenciar Serviços`) atualizada. Você concorda em cadastrar informações fidedignas, incluindo o `Nome` do serviço, o `Preço` (em R$) e a `Duração (minutos)` correta. A `Duração` é o fator principal que o sistema utiliza para calcular a disponibilidade da agenda (RN-AGENDA-004).</p>
 
                 <h2>5. Aceite</h2>
-                <p>Ao marcar a caixa abaixo e clicar em "Aceitar e Continuar", você declara que leu, compreendeu e concorda integralmente com todas as cláusulas destes Termos de Uso e Responsabilidade Profissional.</p>
+                <p>Ao marcar a caixa abaixo, você confirma que entendeu suas responsabilidades profissionais e o compromisso com a privacidade dos dados dos clientes.</p>
                 
                 <form onSubmit={handleSubmit} className={styles.formAceite}>
                     <div className={styles.termsGroup}>
@@ -106,7 +95,7 @@ function TermosBarbeiro() {
                             onChange={(e) => setAccepted(e.target.checked)}
                         />
                         <label htmlFor="terms">
-                            Eu li, compreendi e aceito os Termos de Uso do Profissional.
+                            Li e aceito os Termos de Uso Profissional.
                         </label>
                     </div>
 
@@ -117,7 +106,7 @@ function TermosBarbeiro() {
                         className={styles.submitButton}
                         disabled={!accepted || loading}
                     >
-                        {loading ? 'Salvando...' : 'Aceitar e Continuar'}
+                        {loading ? 'Salvando...' : 'Aceitar e Acessar Painel'}
                     </button>
                 </form>
             </main>
