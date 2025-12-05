@@ -9,40 +9,41 @@ var builder = WebApplication.CreateBuilder(args);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Configuração do CORS para permitir requisições do frontend (localhost:3000)
+// ConfiguraÃ§Ã£o do CORS para permitir requisiÃ§Ãµes do frontend (localhost:3000)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:3000") // Permite apenas esta origem
-                                .AllowAnyHeader() // Permite qualquer cabeçalho
-                                .AllowAnyMethod(); // Permite qualquer método HTTP
+                          policy.WithOrigins("http://localhost:3000",
+                                            "https://agendamento-barbearia-xi.vercel.app")
+                                .AllowAnyHeader() // Permite qualquer cabeÃ§alho
+                                .AllowAnyMethod(); // Permite qualquer mÃ©todo HTTP
                       });
 });
 
-// Configuração da conexão com o banco de dados PostgreSQL
+// ConfiguraÃ§Ã£o da conexÃ£o com o banco de dados PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 // Adiciona suporte a controladores (API)
 builder.Services.AddControllers();
 
-// Configuração do Swagger para documentação da API
+// ConfiguraÃ§Ã£o do Swagger para documentaÃ§Ã£o da API
 builder.Services.AddSwaggerGen(options =>
 {
-    // Define o esquema de segurança para autenticação JWT
+    // Define o esquema de seguranÃ§a para autenticaÃ§Ã£o JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Description = "Autenticação JWT (Bearer Token). Insira 'Bearer' [espaço] e o token.",
+        Description = "AutenticaÃ§Ã£o JWT (Bearer Token). Insira 'Bearer' [espaÃ§o] e o token.",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
         BearerFormat = "JWT"
     });
 
-    // Define os requisitos de segurança para os endpoints
+    // Define os requisitos de seguranÃ§a para os endpoints
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -59,27 +60,27 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Configuração do Identity para autenticação e autorização
+// ConfiguraÃ§Ã£o do Identity para autenticaÃ§Ã£o e autorizaÃ§Ã£o
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 { 
-    // Configurações de senha
-    options.Password.RequireDigit = false; // Não exige dígito
-    options.Password.RequireLowercase = false; // Não exige letra minúscula
-    options.Password.RequireNonAlphanumeric = false; // Não exige caractere especial
-    options.Password.RequireUppercase = false; // Não exige letra maiúscula
-    options.Password.RequiredLength = 6; // Exige no mínimo 6 caracteres
+    // ConfiguraÃ§Ãµes de senha
+    options.Password.RequireDigit = false; // NÃ£o exige dÃ­gito
+    options.Password.RequireLowercase = false; // NÃ£o exige letra minÃºscula
+    options.Password.RequireNonAlphanumeric = false; // NÃ£o exige caractere especial
+    options.Password.RequireUppercase = false; // NÃ£o exige letra maiÃºscula
+    options.Password.RequiredLength = 6; // Exige no mÃ­nimo 6 caracteres
 })
-    .AddRoles<IdentityRole>() // Adiciona suporte a papéis (roles)
+    .AddRoles<IdentityRole>() // Adiciona suporte a papÃ©is (roles)
     .AddEntityFrameworkStores<AppDbContext>() // Usa o AppDbContext para armazenar dados do Identity
     .AddApiEndpoints(); // Adiciona suporte a endpoints da API
 
-// Configuração da autenticação com Bearer Token
+// ConfiguraÃ§Ã£o da autenticaÃ§Ã£o com Bearer Token
 builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 
-// Configuração da autorização
+// ConfiguraÃ§Ã£o da autorizaÃ§Ã£o
 builder.Services.AddAuthorizationBuilder();
 
-// Registro de serviços no container de injeção de dependência
+// Registro de serviÃ§os no container de injeÃ§Ã£o de dependÃªncia
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -90,24 +91,24 @@ builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 
 var app = builder.Build();
 
-// Inicializa os papéis e o administrador padrão
+// Inicializa os papÃ©is e o administrador padrÃ£o
 await app.SeedRolesAndAdminAsync();
 
-// Configuração do ambiente de desenvolvimento
+// ConfiguraÃ§Ã£o do ambiente de desenvolvimento
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger(); // Habilita o Swagger
     app.UseSwaggerUI(); // Habilita a interface do Swagger
 }
 
-// Habilita o CORS com a política definida
+// Habilita o CORS com a polÃ­tica definida
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapIdentityApi<ApplicationUser>(); // Mapeia os endpoints do Identity
 
 app.UseHttpsRedirection(); // Redireciona para HTTPS
 
-app.UseAuthorization(); // Habilita a autorização
+app.UseAuthorization(); // Habilita a autorizaÃ§Ã£o
 
 app.MapControllers(); // Mapeia os controladores da API
 
