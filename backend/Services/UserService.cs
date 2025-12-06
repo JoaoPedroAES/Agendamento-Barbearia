@@ -191,5 +191,18 @@ namespace barbearia.api.Services
 
             return await _userManager.UpdateAsync(user);
         }
+
+        public async Task<List<UserProfileDto>> GetAllUsersAsync()
+        {
+            var users = await _userManager.GetUsersInRoleAsync("Cliente");
+
+            return users.Select(u => new UserProfileDto
+            {
+                Id = u.Id, // <--- OBRIGATÓRIO: Preencher o ID aqui!
+                FullName = u.FullName,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber
+            }).ToList();
+        }
     }
 }

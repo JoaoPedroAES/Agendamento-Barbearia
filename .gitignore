@@ -14,6 +14,8 @@ Thumbs.db
 # --- REGRAS DO BACKEND (.NET) ---
 [Bb]in/
 [Oo]bj/
+# Ignora o arquivo principal de configuração (onde estão suas senhas locais)
+appsettings.json
 appsettings.Development.json
 secrets.json
 *.Secret.json
@@ -21,9 +23,13 @@ secrets.json
 # --- REGRAS DO FRONTEND (Node.js / React) ---
 node_modules/
 build/
+dist/
 .npm/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.env
 .env.local
 .env.development.local
+.env.test.local
+.env.production.local

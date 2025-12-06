@@ -28,7 +28,7 @@ namespace barbearia.api.Services
             var client = new SendGridClient(apiKey);
 
             // Define o remetente do e-mail
-            var from = new EmailAddress("jparaujo1234@hotmail.com", "Barbearia Top");
+            var from = new EmailAddress("barbershop.pfc@gmail.com", "BarberShop");
 
             // Define o assunto do e-mail
             var subject = $"Confirmação de Agendamento - {agendamento.StartDateTime:dd/MM/yyyy HH:mm}";
@@ -40,7 +40,7 @@ namespace barbearia.api.Services
             // Cria o conteúdo do e-mail para o cliente
             var htmlContentCliente = $@"
                 <h1>Olá, {cliente.FullName}!</h1>
-                <p>Seu agendamento na Barbearia Top foi confirmado com sucesso.</p>
+                <p>Seu agendamento na BarberShop foi confirmado com sucesso.</p>
                 <p><strong>Barbeiro:</strong> {barbeiro.UserAccount.FullName}</p>
                 <p><strong>Data:</strong> {agendamento.StartDateTime:dd/MM/yyyy}</p>
                 <p><strong>Hora:</strong> {agendamento.StartDateTime:HH:mm}</p>
@@ -81,7 +81,7 @@ namespace barbearia.api.Services
             var client = new SendGridClient(apiKey);
 
             // Define o remetente do e-mail
-            var from = new EmailAddress("jparaujo1234@hotmail.com", "Barbearia Top");
+            var from = new EmailAddress("barbershop.pfc@gmail.com", "BarberShop");
 
             // Define o assunto do e-mail
             var subject = $"Agendamento Cancelado - {agendamento.StartDateTime:dd/MM/yyyy HH:mm}";
@@ -97,7 +97,7 @@ namespace barbearia.api.Services
             // Cria o conteúdo do e-mail para o cliente
             var htmlContentCliente = $@"
                 <h1>Olá, {cliente.FullName}.</h1>
-                <p>Seu agendamento na Barbearia Top foi <strong>cancelado</strong> com sucesso.</p>
+                <p>Seu agendamento na BarberShop foi <strong>cancelado</strong> com sucesso.</p>
                 <p><strong>Detalhes do agendamento cancelado:</strong></p>
                 <p><strong>Barbeiro:</strong> {barbeiro?.UserAccount?.FullName ?? "N/A"}</p>
                 <p><strong>Data:</strong> {agendamento.StartDateTime:dd/MM/yyyy}</p>

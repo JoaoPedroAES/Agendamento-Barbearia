@@ -216,10 +216,21 @@ function ManagementDashboard() {
                         </button>
                         {menuOpen && (
                             <div className={styles.dropdown}>
+                                
+                                {/* 1. Botão de Barbeiros para Staff */}
                                 {isStaff && ( <button onClick={() => navigateAndClose('/barbeiros')}>Barbeiros</button> )}
+                                
+                                {/* 2. Botão de Clientes SÓ para Admin (NOVO) */}
+                                {isAdmin && ( <button onClick={() => navigateAndClose('/clientes')}>Clientes</button> )}
+
+                                {/* 3. Botão Adicionar Barbeiro para Admin */}
                                 {isAdmin && ( <button onClick={() => navigateAndClose('/adicionar-barbeiro')}>Adicionar Barbeiro</button> )}
-                                <button onClick={() => navigateAndClose(isStaff ? '/editar-barbeiro' : '/perfil')}>Editar Perfil</button>
-                                {/* Botão Deletar Conta foi removido מכאן */}
+                                
+                                {/* 4. Editar Perfil (REMOVIDO SE FOR ADMIN) */}
+                                {!isAdmin && (
+                                    <button onClick={() => navigateAndClose(isStaff ? '/editar-barbeiro' : '/perfil')}>Editar Perfil</button>
+                                )}
+                                
                                 <hr style={{borderColor: '#444', margin: '5px 0'}} />
                                 <button onClick={handleLogout}>Sair</button>
                             </div>
@@ -265,7 +276,6 @@ function ManagementDashboard() {
                 <section className={styles.actionsSection}>
                     <h2>Ações Rápidas</h2>
                     
-                    {/* --- 1. BOTÃO DE HORÁRIOS SÓ APARECE SE FOR BARBEIRO OU ADMIN COM FILTRO --- */}
                     {((isStaff && !isAdmin) || (isAdmin && filterBarberId)) && (
                         <button className={styles.actionButton} onClick={() => setEditingSchedule(!editingSchedule)}>
                             {editingSchedule ? 'Fechar Edição de Horários' : (isAdmin && filterBarberId ? `Editar Horários (${allBarbers.find(b => b.barberId == filterBarberId)?.fullName || 'Selecionado'})` : 'Editar Meus Horários')}
@@ -275,14 +285,13 @@ function ManagementDashboard() {
                     {isAdmin && (
                          <button className={styles.actionButton} onClick={() => navigate('/adicionar-barbeiro')}>Adicionar Barbeiro</button>
                     )}
-                     
+                      
                     {isStaff && (
                          <Link to="/servicos" className={styles.actionButton}>
                              Gerenciar Serviços
                          </Link>
                     )}
                     
-                    {/* --- 2. FORMULÁRIO DE HORÁRIOS SÓ APARECE SE FOR BARBEIRO OU ADMIN COM FILTRO --- */}
                     {editingSchedule && ((isStaff && !isAdmin) || (isAdmin && filterBarberId)) && (
                         <form className={styles.scheduleContainer} onSubmit={handleSaveSchedule}>
                             <h3>
