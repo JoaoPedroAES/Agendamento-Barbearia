@@ -1,5 +1,7 @@
-﻿using barbearia.api.Models;
+using barbearia.api.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace barbearia.api.Data
 {
@@ -13,6 +15,9 @@ namespace barbearia.api.Data
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                
+                // 1. Obtemos a Configuração para ler as senhas do Render
+                var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
                 // Verifica e cria os papéis (roles) se ainda não existirem
                 if (!await roleManager.RoleExistsAsync("Admin"))
@@ -28,30 +33,34 @@ namespace barbearia.api.Data
                     await roleManager.CreateAsync(new IdentityRole("Cliente"));
                 }
 
-                // Define o e-mail e a senha do administrador padrão
-                string adminEmail = "admin@barbearia.com";
-                string adminPassword = "Senha123";
+                // 2. Define o e-mail e a senha pegando das Variáveis de Ambiente (Render) ou appsettings.json
+                string adminEmail = configuration["AdminSettings:Email"];
+                string adminPassword = configuration["AdminSettings:Password"];
 
-                // Verifica se o administrador padrão já existe
-                var adminUser = await userManager.FindByEmailAsync(adminEmail);
-                if (adminUser == null)
+                // Só tenta criar se as variáveis existirem (segurança básica para não quebrar)
+                if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
                 {
-                    // Cria o administrador padrão se ele não existir
-                    adminUser = new ApplicationUser
+                    // Verifica se o administrador padrão já existe
+                    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+                    if (adminUser == null)
                     {
-                        UserName = adminEmail,
-                        Email = adminEmail,
-                        FullName = "Admin Mestre",
-                        EmailConfirmed = true // Marca o e-mail como confirmado
-                    };
+                        // Cria o administrador padrão se ele não existir
+                        adminUser = new ApplicationUser
+                        {
+                            UserName = adminEmail,
+                            Email = adminEmail,
+                            FullName = "Admin Mestre",
+                            EmailConfirmed = true // Marca o e-mail como confirmado
+                        };
 
-                    // Cria o administrador no sistema com a senha padrão
-                    var result = await userManager.CreateAsync(adminUser, adminPassword);
+                        // Cria o administrador no sistema com a senha que veio do Render
+                        var result = await userManager.CreateAsync(adminUser, adminPassword);
 
-                    // Adiciona o administrador ao papel "Admin" se a criação for bem-sucedida
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                        // Adiciona o administrador ao papel "Admin" se a criação for bem-sucedida
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(adminUser, "Admin");
+                        }
                     }
                 }
             }
