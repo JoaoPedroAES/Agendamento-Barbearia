@@ -21,5 +21,6 @@ namespace barbearia.api.Services
         // Exclui permanentemente a conta de um usuário com base no ID fornecido
         // Anonimiza os dados do usuário e retorna o resultado da operação do Identity
         Task<IdentityResult?> DeleteUserAccountAsync(string userId);
+        Task<List<UserProfileDto>> GetAllUsersAsync();
     }
 }
