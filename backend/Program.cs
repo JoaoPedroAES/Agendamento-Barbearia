@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           policy.WithOrigins("http://localhost:3000",
-                                            "https://agendamento-barbearia-xi.vercel.app")
+                                            "https://agendamento-barbearia-lilac.vercel.app")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });

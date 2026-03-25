@@ -197,7 +197,7 @@ function ManagementDashboard() {
 
     
     const filteredAgenda = isAdmin && filterBarberId
-        ? agenda.filter(app => app.barberId == filterBarberId)
+        ? agenda.filter(app => app.barberId === filterBarberId)
         : agenda;
     
     
@@ -278,7 +278,7 @@ function ManagementDashboard() {
                     
                     {((isStaff && !isAdmin) || (isAdmin && filterBarberId)) && (
                         <button className={styles.actionButton} onClick={() => setEditingSchedule(!editingSchedule)}>
-                            {editingSchedule ? 'Fechar Edição de Horários' : (isAdmin && filterBarberId ? `Editar Horários (${allBarbers.find(b => b.barberId == filterBarberId)?.fullName || 'Selecionado'})` : 'Editar Meus Horários')}
+                            {editingSchedule ? 'Fechar Edição de Horários' : (isAdmin && filterBarberId ? `Editar Horários (${allBarbers.find(b => b.barberId === filterBarberId)?.fullName || 'Selecionado'})` : 'Editar Meus Horários')}
                         </button>
                     )}
                     
@@ -296,7 +296,7 @@ function ManagementDashboard() {
                         <form className={styles.scheduleContainer} onSubmit={handleSaveSchedule}>
                             <h3>
                                 {isAdmin && filterBarberId
-                                    ? `Editando horários de ${allBarbers.find(b => b.barberId == filterBarberId)?.fullName}`
+                                    ? `Editando horários de ${allBarbers.find(b => b.barberId === filterBarberId)?.fullName}`
                                     : "Meus Horários de Trabalho"
                                 }
                             </h3>
