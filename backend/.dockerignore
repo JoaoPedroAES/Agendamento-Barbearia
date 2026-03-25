@@ -1,0 +1,12 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.vs
+**/bin
+**/obj
+**/TestResults
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+*.db

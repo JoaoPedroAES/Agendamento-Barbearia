@@ -1,0 +1,178 @@
+
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+}
+
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 3rem 1rem;
+    background-color: #121212; 
+    background-size: cover;
+    background-position: center;
+}
+
+
+.formContainer {
+    width: 100%;
+    max-width: 700px;
+    padding: 2.5rem 3rem;
+    border-radius: 15px;
+    background: rgba(31, 31, 31, 0.7); 
+    backdrop-filter: blur(10px); 
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--dourado);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: #ffffff;
+}
+
+.formContainer h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+
+.inputGroup {
+    margin-bottom: 1.5rem; 
+    width: 100%;
+}
+
+.inputGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #ccc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    color: #ffffff;
+    font-family: 'Oswald', sans-serif;
+    background-color: transparent;
+    border: 1px solid var(--dourado);
+    border-radius: 25px; 
+    
+    
+    box-shadow: 0 0 0 30px #2a2a2a inset !important; 
+    -webkit-text-fill-color: #fff !important;
+}
+
+.inputGroup input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--dourado), 0 0 0 30px #2a2a2a inset !important;
+}
+
+
+.inputGroup input:disabled {
+    opacity: 0.5;
+    border-color: #555;
+    box-shadow: 0 0 0 30px #1f1f1f inset !important; 
+}
+
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem; 
+}
+
+
+.saveButton {
+    background-color: #ffffff;
+    color: #121212;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.8rem 2.5rem;
+    border: none;
+    border-radius: 30px; 
+    cursor: pointer;
+    transition: opacity 0.2s;
+    text-transform: uppercase;
+}
+
+.saveButton:hover {
+    opacity: 0.8;
+}
+
+
+.backButton {
+    background-color: transparent;
+    color: var(--dourado);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.8rem 2.5rem;
+    border: 2px solid var(--dourado); 
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.backButton:hover {
+    background-color: var(--dourado);
+    color: #121212; 
+}
+
+
+.error {
+    color: #ff6b6b;
+    text-align: center;
+    margin: 0.5rem 0 1.5rem 0; 
+    font-weight: 500;
+}
+
+.textarea {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    color: #ffffff;
+    font-family: 'Oswald', sans-serif;
+    background-color: transparent;
+    border: 1px solid var(--dourado);
+    border-radius: 25px;
+    resize: vertical;
+    min-height: 100px;
+    
+    
+    
+    box-shadow: 0 0 0 30px #2a2a2a inset !important; 
+    -webkit-text-fill-color: #fff !important; 
+    
+    
+    outline: none; 
+    
+    
+    -webkit-box-shadow: none !important; 
+    -moz-box-shadow: none !important;    
+    box-shadow: none !important;         
+    
+    
+    -webkit-tap-highlight-color: transparent;
+}
+
+.textarea:focus {
+    
+    outline: none; 
+    border-color: var(--dourado-claro); 
+    
+    
+    box-shadow: 0 0 0 2px var(--dourado-claro), 0 0 0 30px #2a2a2a inset !important; 
+    
+    
+}

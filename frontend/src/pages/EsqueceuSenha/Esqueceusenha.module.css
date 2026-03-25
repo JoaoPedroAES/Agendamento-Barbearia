@@ -1,0 +1,169 @@
+* {
+    box-sizing: border-box;
+}
+
+.tela {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Caminho da imagem deve ser igual ao do login */
+    background-image: url("/public/img/background.png"); 
+    background-size: cover;
+    background-position: center;
+}
+
+.container {
+    width: 450px;
+    background-color: rgba(255, 255, 255, 0.15); /* Efeito vidro */
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2); 
+    padding: 40px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.container h1 {
+    text-align: center;
+    font-size: 32px;
+    color: var(--branco);
+    margin-bottom: 10px;
+}
+
+/* Estilo específico para a descrição do passo (ex: "Informe seus dados...") */
+.description {
+    color: var(--branco);
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 25px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.container .texto {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 0 0 25px 0; /* Ajustei a margem para ficar uniforme */
+}
+
+.texto input {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    outline: none;
+    border: 2px solid var(--dourado); /* Garante a borda dourada */
+    border-radius: 40px;
+    font-size: 16px;
+    color: var(--branco);
+    /* Espaço extra na direita para o ícone não ficar em cima do texto */
+    padding: 20px 50px 20px 25px; 
+}
+
+.texto input::placeholder {
+    color: var(--branco);
+    opacity: 0.7;
+}
+
+/* Posicionamento do Ícone (igual ao Login: na direita) */
+.texto .icon {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--dourado);
+}
+
+/* Botão Principal */
+.button {
+    width: 100%;
+    height: 50px; 
+    background-color: var(--branco);
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    color: #000; /* Texto preto para contraste no botão branco */
+}
+
+.button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    /* Se quiseres o gradiente dourado no hover */
+    background: var(--dourado); 
+    color: var(--branco);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Mensagem de Erro */
+.error {
+    color: #ffb3b3; 
+    background-color: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Links de Voltar / Cancelar */
+.backLink {
+    margin-top: 25px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.backLink a {
+    color: var(--branco);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    transition: color 0.3s;
+}
+
+.backLink a:hover {
+    color: var(--dourado);
+    text-decoration: underline;
+}
+
+/* Botão de Cancelar (segundo passo) que parece um link */
+.cancelButton {
+    background: none;
+    border: none;
+    color: var(--branco);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    margin: 0 auto; /* Centralizar */
+    box-shadow: none; /* Remove a sombra do botão padrão */
+    width: auto; /* Remove a largura de 100% */
+    height: auto;
+}
+
+.cancelButton:hover {
+    color: var(--dourado);
+    text-decoration: underline;
+    background: none;
+    transform: none;
+    box-shadow: none;
+}

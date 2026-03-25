@@ -1,0 +1,301 @@
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+    --branco: #ffffff;
+    --preto-fundo: #1f1f1f;
+    --preto-card: #2a2a2a;
+    --vermelho: #e74c3c;
+}
+
+.page {
+    padding: 2rem 4rem;
+    background-color: var(--preto-fundo);
+    color: var(--branco);
+    min-height: 100vh;
+}
+
+/* --- HEADER --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+    color: var(--branco);
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.welcomeMessage {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #ccc;
+    margin-right: 2.5rem; 
+}
+
+.settingsMenu { position: relative; }
+
+.gearButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: var(--branco);
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background-color: #1c1c1c;
+    border: 1px solid var(--dourado);
+    border-radius: 5px;
+    width: 200px;
+    z-index: 100;
+    padding: 5px 0;
+}
+
+.dropdown button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: var(--branco);
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.dropdown button:hover {
+    background-color: var(--dourado);
+    color: black;
+}
+
+/* --- GRID PRINCIPAL --- */
+.mainGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+/* --- COLUNA ESQUERDA: AGENDA --- */
+.agendaSection h2 {
+    color: var(--dourado);
+    font-weight: 400;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.sectionHeader {
+    margin-bottom: 1rem;
+}
+
+/* CONTROLES DE FILTRO (Estilo Simples) */
+.filterControls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: var(--preto-card);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.filterControls label {
+    font-weight: 600;
+    color: var(--dourado);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dateInput {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #1a1a1a;
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    outline: none;
+    font-size: 1rem;
+}
+
+.dateInput:focus {
+    border-color: var(--dourado);
+}
+
+/* Ícone de calendário do input date (para navegadores webkit) */
+.dateInput::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.clearButton {
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    width: 35px;
+    height: 35px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clearButton:hover {
+    border-color: var(--vermelho);
+    color: var(--vermelho);
+}
+
+.appointmentList {
+    display: grid;
+    gap: 1rem;
+}
+
+/* --- COLUNA DIREITA: AÇÕES --- */
+.actionsSection h2 {
+    color: var(--dourado);
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+}
+
+.actionButton {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--dourado);
+    color: #121212;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 5px;
+    transition: opacity 0.2s;
+    margin-bottom: 2rem;
+    border: none;
+    cursor: pointer;
+}
+
+.actionButton:hover {
+    opacity: 0.9;
+}
+
+.servicesContainer {
+    background-color: var(--preto-card);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.servicesContainer h3 {
+    color: #ccc;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.servicesList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.serviceItem {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.serviceName { color: #fff; }
+.servicePrice { color: var(--dourado); font-weight: 600; }
+
+/* --- CARDS DE AGENDAMENTO --- */
+.appointmentCard {
+    background-color: var(--preto-card);
+    padding: 1.2rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--dourado);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.date { color: var(--dourado); font-weight: 600; }
+.time { color: #ccc; }
+
+.statusAgendado { color: #2ecc71; font-weight: 600; }
+.statusCancelado { color: var(--vermelho); font-weight: 600; }
+
+.cancelButton {
+    background: transparent;
+    border: 1px solid var(--vermelho);
+    color: var(--vermelho);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-top: 0.8rem;
+    width: 100%;
+}
+.cancelButton:hover {
+    background: var(--vermelho);
+    color: white;
+}
+
+.emptyState {
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    color: #ccc;
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.linkButton {
+    background: none;
+    border: none;
+    color: var(--dourado);
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+    .page { padding: 1rem; }
+    .mainGrid { grid-template-columns: 1fr; gap: 2rem; }
+    .header { flex-direction: column; gap: 1rem; text-align: center; }
+    .welcomeMessage { margin-right: 0; margin-bottom: 1rem; }
+    .filterControls { flex-direction: column; align-items: flex-start; }
+}

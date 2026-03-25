@@ -1,0 +1,30 @@
+
+.linha {
+  width: 100%;              
+  height: 2px;              
+  background-color: var(--dourado); 
+  margin: 40px auto;        
+  border: none;
+}
+
+
+.container {
+  padding: 60px 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.titulo {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 40px;
+  font-family: 'Times New Roman', serif; 
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.imagemContainer {
+  display: flex;
+  justify-content: center;
+}
+

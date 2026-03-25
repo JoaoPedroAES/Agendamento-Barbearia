@@ -1,0 +1,210 @@
+/* src/pages/TermosBarbeiro/TermosBarbeiro.module.css */
+:root {
+    font-family: 'Oswald', sans-serif;
+    --dourado: #D4AF37; 
+    --branco: #ffffff;
+    --preto-fundo: #1f1f1f;
+    --preto-card: #2a2a2a;
+    --cinza-texto: #ccc;
+    --cinza-borda: #555;
+    --vermelho: #e74c3c;
+    --preto-input: #333;
+}
+
+.page {
+    padding: 2rem 4rem;
+    background-color: var(--preto-fundo);
+    color: var(--branco);
+    min-height: 100vh;
+}
+
+/* --- Cabeçalho (Sem botão voltar) --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--dourado);
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+    color: var(--branco);
+}
+
+/* Botão de Logout (Substitui o Voltar) */
+.logoutButton {
+    background: none;
+    border: 1px solid var(--vermelho);
+    color: var(--vermelho);
+    padding: 0.5rem 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    width: 100px;
+    text-align: center;
+    justify-content: center;
+}
+.logoutButton:hover {
+    background-color: var(--vermelho);
+    color: var(--branco);
+}
+
+
+/* --- Conteúdo de Texto --- */
+.content {
+    max-width: 900px; /* Limita a largura do texto para leitura */
+    margin: 0 auto;
+    background-color: var(--preto-card);
+    padding: 2rem 3rem 3rem 3rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.intro {
+    font-size: 1.2rem;
+    color: var(--branco);
+    font-style: italic;
+    border-bottom: 1px solid var(--cinza-borda);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.content h2 {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--dourado);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--cinza-borda);
+}
+
+.content h3 {
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--dourado);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.content p, .content li {
+    font-size: 1.1rem;
+    color: var(--cinza-texto);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.content ul {
+    padding-left: 20px;
+}
+.content li {
+    margin-bottom: 0.5rem;
+}
+.content li strong {
+    color: var(--branco);
+    font-weight: 500;
+}
+
+/* --- Formulário de Aceite --- */
+.formAceite {
+    margin-top: 3rem;
+    border-top: 2px solid var(--dourado);
+    padding-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.termsGroup {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    gap: 10px;
+}
+
+.termsGroup input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--dourado);
+    border-radius: 3px;
+    background-color: var(--preto-input);
+    cursor: pointer;
+    position: relative;
+    display: grid;
+    place-content: center;
+    flex-shrink: 0;
+}
+
+.termsGroup input[type="checkbox"]::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: var(--dourado);
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    border-radius: 2px;
+}
+
+.termsGroup input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+.termsGroup label {
+    font-size: 1.1rem;
+    color: var(--branco);
+    margin: 0;
+    cursor: pointer;
+    line-height: 1.3;
+    font-weight: 500;
+}
+
+.submitButton {
+    width: 100%;
+    max-width: 400px; /* Limita a largura do botão */
+    padding: 1rem;
+    margin-top: 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--dourado);
+    color: #121212;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.submitButton:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.error {
+    color: var(--vermelho);
+    text-align: center;
+    font-weight: 500;
+    margin-top: 1rem;
+}

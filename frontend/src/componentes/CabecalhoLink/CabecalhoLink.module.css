@@ -1,0 +1,8 @@
+.link{
+    color: var(--dourado);
+    font-size: 100px;
+    font-weight: 300;
+    display: flex;
+    text-decoration: none;
+    padding-top: 50px;
+}
