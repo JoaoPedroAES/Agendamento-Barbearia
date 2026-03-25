@@ -7,9 +7,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Nome da política de CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Configuração do CORS para permitir requisições do frontend (localhost:3000)
+// --- 1. CONFIGURAÇÃO DE CORS ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -17,22 +18,20 @@ builder.Services.AddCors(options =>
                       {
                           policy.WithOrigins("http://localhost:3000",
                                             "https://agendamento-barbearia-xi.vercel.app")
-                                .AllowAnyHeader() // Permite qualquer cabeçalho
-                                .AllowAnyMethod(); // Permite qualquer método HTTP
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
                       });
 });
 
-// Configuração da conexão com o banco de dados PostgreSQL
+// --- 2. BANCO DE DATA (PostgreSQL/Supabase) ---
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-// Adiciona suporte a controladores (API)
 builder.Services.AddControllers();
 
-// Configuração do Swagger para documentação da API
+// --- 3. SWAGGER (Documentação) ---
 builder.Services.AddSwaggerGen(options =>
 {
-    // Define o esquema de segurança para autenticação JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -43,44 +42,35 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT"
     });
 
-    // Define os requisitos de segurança para os endpoints
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             new string[] {}
         }
     });
 });
 
-// Configuração do Identity para autenticação e autorização
+// --- 4. IDENTITY & AUTHENTICATION ---
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
-{ 
-    // Configurações de senha
-    options.Password.RequireDigit = false; // Não exige dígito
-    options.Password.RequireLowercase = false; // Não exige letra minúscula
-    options.Password.RequireNonAlphanumeric = false; // Não exige caractere especial
-    options.Password.RequireUppercase = false; // Não exige letra maiúscula
-    options.Password.RequiredLength = 6; // Exige no mínimo 6 caracteres
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
 })
-    .AddRoles<IdentityRole>() // Adiciona suporte a papéis (roles)
-    .AddEntityFrameworkStores<AppDbContext>() // Usa o AppDbContext para armazenar dados do Identity
-    .AddApiEndpoints(); // Adiciona suporte a endpoints da API
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddApiEndpoints();
 
-// Configuração da autenticação com Bearer Token
 builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
-
-// Configuração da autorização
 builder.Services.AddAuthorizationBuilder();
 
-// Registro de serviços no container de injeção de dependência
+// --- 5. INJEÇÃO DE DEPENDÊNCIA (Serviços) ---
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -91,25 +81,49 @@ builder.Services.AddScoped<IWorkScheduleService, WorkScheduleService>();
 
 var app = builder.Build();
 
-// Inicializa os papéis e o administrador padrão
-await app.SeedRolesAndAdminAsync();
-
-// Configuração do ambiente de desenvolvimento
-if (app.Environment.IsDevelopment())
+// --- 6. INICIALIZAÇÃO DO BANCO (MIGRATE + SEED) ---
+// Este bloco garante que o banco esteja pronto antes da API começar a receber requisições
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger(); // Habilita o Swagger
-    app.UseSwaggerUI(); // Habilita a interface do Swagger
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+
+        Console.WriteLine("--> [DATABASE] Verificando migrações pendentes...");
+        // MigrateAsync cria as tabelas no Supabase se elas não existirem
+        await context.Database.MigrateAsync();
+        Console.WriteLine("--> [DATABASE] Migrações aplicadas/verificadas com sucesso!");
+
+        Console.WriteLine("--> [SEEDER] Iniciando DataSeeder...");
+        // SeedRolesAndAdminAsync cria as Roles e o Admin padrão
+        await DataSeeder.SeedRolesAndAdminAsync(app);
+        Console.WriteLine("--> [SEEDER] Dados iniciais populados com sucesso!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"--> [ERRO] Falha crítica na inicialização do banco: {ex.Message}");
+    }
 }
 
-// Habilita o CORS com a política definida
+// --- 7. MIDDLEWARES & ROTAS ---
+
+// Habilita Swagger tanto em Dev quanto em Prod no Render para facilitar testes
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseCors(MyAllowSpecificOrigins);
 
-app.MapIdentityApi<ApplicationUser>(); // Mapeia os endpoints do Identity
+app.MapIdentityApi<ApplicationUser>();
 
-app.UseHttpsRedirection(); // Redireciona para HTTPS
+app.UseHttpsRedirection();
 
-app.UseAuthorization(); // Habilita a autorização
+app.UseAuthentication(); // Importante: deve vir antes da Authorization
+app.UseAuthorization();
 
-app.MapControllers(); // Mapeia os controladores da API
+app.MapControllers();
 
-app.Run(); // Inicia o aplicativo
+app.Run();
